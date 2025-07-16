@@ -68,7 +68,11 @@ class ChooseDriverUser extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, AppRoute.login);
+                        Navigator.pushNamed(
+                          context,
+                          AppRoute.login,
+                          arguments: 'user',
+                        );
                       },
                       child: Text(
                         'Login as User',
@@ -82,21 +86,25 @@ class ChooseDriverUser extends StatelessWidget {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: const BorderSide(color: Colors.black),
+                        side:  BorderSide(color: Colors.black),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, AppRoute.login);
+                        Navigator.pushNamed(
+                          context,
+                          AppRoute.login,
+                          arguments: 'driver',
+                        );
                       },
-                      child: const Text(
+                      child:  Text(
                         'Login as Driver',
                         style: TextStyle(fontSize: 16, color: Colors.black),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                   SizedBox(height: 24),
                 ],
               ),
             ],

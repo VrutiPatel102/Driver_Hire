@@ -1,24 +1,24 @@
 import 'package:driver_hire/color.dart';
-import 'package:driver_hire/user/Booking/Booking_Screen.dart';
-import 'package:driver_hire/user/Home/home_screen.dart';
-import 'package:driver_hire/user/Profile/profile_screen.dart';
+import 'package:driver_hire/driver/Bookings/driver_booking_screen.dart';
+import 'package:driver_hire/driver/Home/driver_home_screen.dart';
+import 'package:driver_hire/driver/Profile/driver_profile_screen.dart';
 import 'package:flutter/material.dart';
 
 
-class BottomBarScreen extends StatefulWidget {
-  const BottomBarScreen({super.key});
+class DriverBottomBarScreen extends StatefulWidget {
+  const DriverBottomBarScreen({super.key});
 
   @override
-  State<BottomBarScreen> createState() => _BottomBarScreenState();
+  State<DriverBottomBarScreen> createState() => _DriverBottomBarScreenState();
 }
 
-class _BottomBarScreenState extends State<BottomBarScreen> {
+class _DriverBottomBarScreenState extends State<DriverBottomBarScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
-    const BookingsScreen(),
-    const ProfileScreen(),
+    const DriverHomeScreen(),
+    const DriverBookingScreen(),
+    const DriverProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

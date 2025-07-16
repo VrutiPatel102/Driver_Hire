@@ -3,7 +3,9 @@ import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String loginAs; // either 'user' or 'driver'
+
+  const LoginScreen({super.key, required this.loginAs});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -158,7 +160,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         onPressed: () {
-          Navigator.pushNamed(context, AppRoute.bottombar);
+          if (widget.loginAs == 'user') {
+            Navigator.pushNamed(context, AppRoute.bottombar); // user home
+          } else if (widget.loginAs == 'driver') {
+            Navigator.pushNamed(context, AppRoute.driverbottombar); // driver-specific screen
+          }
         },
         child: Text(
           'Login',

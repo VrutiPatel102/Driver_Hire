@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
+import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
 class HomeScreen extends StatelessWidget {

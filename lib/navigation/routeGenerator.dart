@@ -1,7 +1,7 @@
-import 'package:driver_hire/Home/book_driver.dart';
 import 'package:driver_hire/bottom_bar.dart';
 import 'package:driver_hire/choose_driverORuser.dart';
 import 'package:driver_hire/create_newPwd.dart';
+import 'package:driver_hire/driver/driver_bottom_bar.dart';
 import 'package:driver_hire/forgotPwd.dart';
 import 'package:driver_hire/login_screen.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
@@ -9,6 +9,7 @@ import 'package:driver_hire/otp.dart';
 import 'package:driver_hire/pwd_changed.dart';
 import 'package:driver_hire/register_screen.dart';
 import 'package:driver_hire/splash_screen.dart';
+import 'package:driver_hire/user/Home/book_driver.dart';
 import 'package:flutter/material.dart';
 
 class RouteGenerator{
@@ -26,8 +27,9 @@ class RouteGenerator{
           settings: settings,
         );
       case AppRoute.login:
+        final loginAs = settings.arguments as String? ?? 'user'; // default to 'user'
         return MaterialPageRoute(
-          builder: (context) => LoginScreen(),
+          builder: (context) => LoginScreen(loginAs: loginAs),
           settings: settings,
         );
       case AppRoute.register:
@@ -63,6 +65,11 @@ class RouteGenerator{
       case AppRoute.driverBooking:
         return MaterialPageRoute(
           builder: (context) => BookDriverScreen(),
+          settings: settings,
+        );
+      case AppRoute.driverbottombar:
+        return MaterialPageRoute(
+          builder: (context) => DriverBottomBarScreen(),
           settings: settings,
         );
 
