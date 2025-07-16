@@ -34,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         onPressed: () {
           Navigator.pop(context);
         },
-        icon: const Icon(Icons.arrow_back_ios, size: 16),
+        icon:  Icon(Icons.arrow_back_ios, size: 16),
         padding: const EdgeInsets.all(13),
         style: IconButton.styleFrom(
           backgroundColor: Colors.transparent,
@@ -53,21 +53,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 10),
+           SizedBox(height: 10),
           _logo(),
-          const SizedBox(height: 20),
+           SizedBox(height: 20),
           _welcomeText(),
-          const SizedBox(height: 15),
+           SizedBox(height: 15),
           _usernameField(),
-          const SizedBox(height: 14),
+           SizedBox(height: 14),
           _emailField(),
-          const SizedBox(height: 14),
+           SizedBox(height: 14),
           _passwordField(),
-          const SizedBox(height: 14),
+           SizedBox(height: 14),
           _confirmPasswordField(),
-          const SizedBox(height: 20),
+           SizedBox(height: 20),
           _registerBtn(),
-          const Spacer(),
+           Spacer(),
           _loginLink(),
         ],
       ),
