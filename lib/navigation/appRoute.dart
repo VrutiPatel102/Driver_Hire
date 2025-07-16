@@ -3,20 +3,20 @@ class AppRoute{
   static const chooseScreen="Choose_Screen";
   static const login="Login_Screen";
   static const register ="Register_screen";
-  static const forgotpassword ="Forgot_password";
+  static const forgotPassword ="Forgot_password";
   static const otp ="Otp_screen";
 
   static const resetPwd ="ResetPwd_screen";
-  static const pwdchanged ="pwdchanged_screen";
+  static const pwdChanged ="pwdchanged_screen";
 
   static const bottombar  ="bottombar_screen";
   static const driverBooking ="driver_booking";
-  static const driverbottombar ="driverbottombar_screen";
+  static const driverBottombar ="driverbottombar_screen";
 
   static const waitingDriver ="waiting_driver_screen";
-  static const detailscreen ="Detail_screen";
-
-
+  static const detailScreen ="Detail_screen";
+  static const rideRequestDetailScreen = "RideRequestDetail_Screen";
+  static const driverRideDetailScreen = "DriverRideDetail_Screen";
 
 
 

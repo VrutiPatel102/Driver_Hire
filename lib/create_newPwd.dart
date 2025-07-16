@@ -183,7 +183,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         _errorMessage = 'Password not match! please try again';
       } else {
         _errorMessage = null;
-       Navigator.pushNamed(context,AppRoute.pwdchanged);
+       Navigator.pushNamed(context,AppRoute.pwdChanged);
       }
     });
   }

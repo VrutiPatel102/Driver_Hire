@@ -2,6 +2,8 @@ import 'package:driver_hire/bottom_bar.dart';
 
 import 'package:driver_hire/choose_driverORuser.dart';
 import 'package:driver_hire/create_newPwd.dart';
+import 'package:driver_hire/driver/Home/driver_ride_detail_screen.dart';
+import 'package:driver_hire/driver/Home/ride_request_detail_screen.dart';
 import 'package:driver_hire/driver/driver_bottom_bar.dart';
 import 'package:driver_hire/forgotPwd.dart';
 import 'package:driver_hire/login_screen.dart';
@@ -41,7 +43,7 @@ class RouteGenerator{
           builder: (context) => RegisterScreen(),
           settings: settings,
         );
-      case AppRoute.forgotpassword:
+      case AppRoute.forgotPassword:
         return MaterialPageRoute(
           builder: (context) => ForgotPasswordScreen(),
           settings: settings,
@@ -56,7 +58,7 @@ class RouteGenerator{
           builder: (context) => ResetPasswordScreen(),
           settings: settings,
         );
-      case AppRoute.pwdchanged:
+      case AppRoute.pwdChanged:
         return MaterialPageRoute(
           builder: (context) => PasswordChangedScreen(),
           settings: settings,
@@ -71,7 +73,7 @@ class RouteGenerator{
           builder: (context) => BookDriverScreen(),
           settings: settings,
         );
-      case AppRoute.driverbottombar:
+      case AppRoute.driverBottombar:
         return MaterialPageRoute(
           builder: (context) => DriverBottomBarScreen(),
           settings: settings,
@@ -81,11 +83,22 @@ class RouteGenerator{
           builder: (context) => WaitingDriver(),
           settings: settings,
         );
-      case AppRoute.detailscreen:
+      case AppRoute.detailScreen:
         return MaterialPageRoute(
           builder: (context) => DetailScreen(),
           settings: settings,
         );
+      case AppRoute.rideRequestDetailScreen:
+        return MaterialPageRoute(
+          builder: (context) => RideRequestDetailScreen(),
+          settings: settings,
+        );
+      case AppRoute.driverRideDetailScreen:
+        return MaterialPageRoute(
+          builder: (context) => DriverRideDetailScreen(),
+          settings: settings,
+        );
+
 
     }
     return MaterialPageRoute(

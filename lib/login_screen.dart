@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {
-          Navigator.pushNamed(context, AppRoute.forgotpassword);
+          Navigator.pushNamed(context, AppRoute.forgotPassword);
         },
         child: Text(
           'Forgot Password?',
@@ -163,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (widget.loginAs == 'user') {
             Navigator.pushNamed(context, AppRoute.bottombar); // user home
           } else if (widget.loginAs == 'driver') {
-            Navigator.pushNamed(context, AppRoute.driverbottombar); // driver-specific screen
+            Navigator.pushNamed(context, AppRoute.driverBottombar); // driver-specific screen
           }
         },
         child: Text(

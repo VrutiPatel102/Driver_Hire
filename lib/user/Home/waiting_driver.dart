@@ -17,7 +17,7 @@ class _WaitingDriverState extends State<WaitingDriver> {
   @override
   void initState() {
     Timer(Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, AppRoute.detailscreen);
+      Navigator.pushReplacementNamed(context, AppRoute.detailScreen);
     },);
     super.initState();
   }
