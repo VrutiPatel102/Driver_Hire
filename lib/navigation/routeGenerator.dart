@@ -1,4 +1,6 @@
 import 'package:driver_hire/Home/book_driver.dart';
+import 'package:driver_hire/Home/detail_screen.dart';
+import 'package:driver_hire/Home/waiting_driver.dart';
 import 'package:driver_hire/bottom_bar.dart';
 import 'package:driver_hire/choose_driverORuser.dart';
 import 'package:driver_hire/create_newPwd.dart';
@@ -63,6 +65,16 @@ class RouteGenerator{
       case AppRoute.driverBooking:
         return MaterialPageRoute(
           builder: (context) => BookDriverScreen(),
+          settings: settings,
+        );
+      case AppRoute.waitingDriver:
+        return MaterialPageRoute(
+          builder: (context) => WaitingDriver(),
+          settings: settings,
+        );
+      case AppRoute.detailscreen:
+        return MaterialPageRoute(
+          builder: (context) => DetailScreen(),
           settings: settings,
         );
 

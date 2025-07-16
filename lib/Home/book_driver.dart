@@ -1,3 +1,4 @@
+import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -34,7 +35,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                 'Book a driver',
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               const Text(
                 'Please Select your Trip type',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -47,7 +48,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                   _tripTypeButton('Round trip'),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
               const Text(
                 'Select Car Type',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -61,7 +62,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                   _carTypeOption('SUV', 'assets/image 3.png'),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
               Row(
                 children: [
                   Expanded(child: _locationInput('PickUp Address', true)),
@@ -69,7 +70,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                   Expanded(child: _locationInput('Reach Place', false)),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
@@ -89,7 +90,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 60),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -101,7 +102,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                     ),
                   ),
                   onPressed: () {
-                    // Next Action
+                      Navigator.pushNamed(context,AppRoute.waitingDriver);
                   },
                   child: Text(
                     'Next',

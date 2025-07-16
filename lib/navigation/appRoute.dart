@@ -11,8 +11,8 @@ class AppRoute{
 
   static const bottombar  ="bottombar_screen";
   static const driverBooking ="driver_booking";
-  // static const pwdchanged ="pwdchanged_screen";
-
+  static const waitingDriver ="waiting_driver_screen";
+  static const detailscreen ="Detail_screen";
 
 
 
