@@ -80,7 +80,7 @@ class DriverHomeScreen extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: AColor().green.withOpacity(0.1),
+          color: AColor().green.withAlpha(26), // 26 is 10% of 255,
           borderRadius: BorderRadius.circular(16),
         ),
         padding: const EdgeInsets.all(20),
@@ -89,7 +89,7 @@ class DriverHomeScreen extends StatelessWidget {
           children: [
             _buildHeader(data),
             SizedBox(height: 12),
-            Divider(color: AColor().green.withOpacity(0.4)),
+            Divider(color: AColor().green.withAlpha(102)),
             SizedBox(height: 12),
             _buildAddress(label: 'Pickup', address: data['pickup']!),
             SizedBox(height: 10),

@@ -44,7 +44,7 @@ class RideRequestDetailScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AColor().green.withOpacity(0.1),
+          color: AColor().green.withAlpha(26),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
