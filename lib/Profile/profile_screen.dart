@@ -8,8 +8,8 @@ class ProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout',style: TextStyle(fontSize: 17),),
-        content: const Text('Are you sure you want to logout?'),
+        title:  Text('Confirm Logout',style: TextStyle(fontSize: 17),),
+        content:  Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -34,8 +34,8 @@ class ProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
+        title:  Text('Delete Account'),
+        content:  Text(
           'This action cannot be undone.\nAre you sure you want to delete your account?',
         ),
         actions: [
