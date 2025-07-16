@@ -13,6 +13,8 @@ class AppRoute{
   static const driverBooking ="driver_booking";
   static const driverbottombar ="driverbottombar_screen";
 
+  static const waitingDriver ="waiting_driver_screen";
+  static const detailscreen ="Detail_screen";
 
 
 
