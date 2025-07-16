@@ -3,7 +3,6 @@ import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 
-import 'choose_driverORuser.dart';
 class Spalshscreen extends StatefulWidget {
   const Spalshscreen({super.key});
 
