@@ -1,4 +1,5 @@
 import 'package:driver_hire/bottom_bar.dart';
+
 import 'package:driver_hire/choose_driverORuser.dart';
 import 'package:driver_hire/create_newPwd.dart';
 import 'package:driver_hire/driver/driver_bottom_bar.dart';
@@ -11,6 +12,9 @@ import 'package:driver_hire/register_screen.dart';
 import 'package:driver_hire/splash_screen.dart';
 import 'package:driver_hire/user/Home/book_driver.dart';
 import 'package:flutter/material.dart';
+
+import '../user/Home/detail_screen.dart';
+import '../user/Home/waiting_driver.dart';
 
 class RouteGenerator{
 
@@ -70,6 +74,16 @@ class RouteGenerator{
       case AppRoute.driverbottombar:
         return MaterialPageRoute(
           builder: (context) => DriverBottomBarScreen(),
+          settings: settings,
+        );
+      case AppRoute.waitingDriver:
+        return MaterialPageRoute(
+          builder: (context) => WaitingDriver(),
+          settings: settings,
+        );
+      case AppRoute.detailscreen:
+        return MaterialPageRoute(
+          builder: (context) => DetailScreen(),
           settings: settings,
         );
 
