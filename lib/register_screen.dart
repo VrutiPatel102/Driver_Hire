@@ -57,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _logo(),
            SizedBox(height: 20),
           _welcomeText(),
-           SizedBox(height: 15),
+           SizedBox(height: 14),
           _usernameField(),
            SizedBox(height: 14),
           _emailField(),
