@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
+import '../../navigation/appRoute.dart';
+
 class DriverProfileScreen extends StatelessWidget {
   const DriverProfileScreen({super.key});
 
@@ -48,10 +50,10 @@ class DriverProfileScreen extends StatelessWidget {
               backgroundColor: AColor().Red,
             ),
             onPressed: () {
-              Navigator.pop(context);
-              // TODO: Add your actual delete logic here.
+              Navigator.of(context).pop();
+              Navigator.pushReplacementNamed(context, AppRoute.register);
             },
-            child: const Text('Delete'),
+            child:  Text('Delete',style: TextStyle(color: AColor().White),),
           ),
         ],
       ),
