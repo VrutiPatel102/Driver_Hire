@@ -65,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _passwordField(),
            SizedBox(height: 14),
           _confirmPasswordField(),
-           SizedBox(height: 20),
+           SizedBox(height: 14),
           _registerBtn(),
            Spacer(),
           _loginLink(),
