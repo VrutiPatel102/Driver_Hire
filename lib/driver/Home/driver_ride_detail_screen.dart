@@ -90,7 +90,7 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
             ],
           ),
         ),
-        _ZoomBtn(),
+        _zoomBtn(),
       ],
     );
   }
@@ -125,7 +125,7 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
   }
 
 
-  Widget _ZoomBtn() {
+  Widget _zoomBtn() {
     return Positioned(
       right: 10,
       top: 10,
