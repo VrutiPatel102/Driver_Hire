@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 
 
 class BottomBarScreen extends StatefulWidget {
-  const BottomBarScreen({super.key});
+
+  final int initialIndex;
+  const BottomBarScreen({super.key, this.initialIndex = 0});
 
   @override
   State<BottomBarScreen> createState() => _BottomBarScreenState();
@@ -20,6 +22,12 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
     const BookingsScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onItemTapped(int index) {
     setState(() {
