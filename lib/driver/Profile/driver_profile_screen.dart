@@ -4,7 +4,6 @@ import 'package:driver_hire/color.dart';
 import '../../navigation/appRoute.dart';
 
 class DriverProfileScreen extends StatelessWidget {
-
   const DriverProfileScreen({super.key});
 
   void _showLogoutDialog(BuildContext context) {
@@ -67,7 +66,7 @@ class DriverProfileScreen extends StatelessWidget {
         title: Row(
           children: [
             Icon(Icons.person_outline, color: AColor().Black),
-             SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               'Profile',
               style: TextStyle(
@@ -76,7 +75,7 @@ class DriverProfileScreen extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-             Spacer(),
+            Spacer(),
             GestureDetector(
               onTap: () => _showLogoutDialog(context),
               child: Container(
@@ -105,17 +104,17 @@ class DriverProfileScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.only(left: 40, top: 40, bottom: 90),
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: AColor().green.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.shade200,
+                    color: Colors.grey.withOpacity(0.1),
                     spreadRadius: 2,
                     blurRadius: 10,
                   ),
                 ],
               ),
-              child:  Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Name :', style: TextStyle(fontSize: 20)),
@@ -128,7 +127,7 @@ class DriverProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-             SizedBox(height: 20),
+            SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -149,7 +148,7 @@ class DriverProfileScreen extends StatelessWidget {
                 ),
               ],
             ),
-             Spacer(),
+            Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

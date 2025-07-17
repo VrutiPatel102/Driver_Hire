@@ -210,7 +210,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-            Navigator.pushNamed(context, AppRoute.login);
+            Navigator.pushNamed(context, AppRoute.chooseScreen);
           }
         },
         child: Text(
