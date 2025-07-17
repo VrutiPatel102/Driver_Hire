@@ -3,8 +3,6 @@ import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'map_picker_screen.dart';
 
 class BookDriverScreen extends StatefulWidget {
   const BookDriverScreen({super.key});
@@ -88,17 +86,15 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                         ),
                       );
 
-                      if (result != null) {
-                        if (result is SimpleLocationResult) {
-                          point1 = GeoPoint(
-                            latitude: result.latitude,
-                            longitude: result.longitude,
-                          );
-                          pickUpController.text =
-                              "${point1?.latitude},${point1?.longitude}";
-                          setState(() {});
-                        }
+                      if (result != null && result is Map) {
+                        point1 = GeoPoint(
+                          latitude: result['lat'],
+                          longitude: result['lng'],
+                        );
+                        pickUpController.text = result['address'] ?? '';
+                        setState(() {});
                       }
+
                     },
                     child: TextField(
                       enabled: false,
@@ -127,17 +123,15 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                         ),
                       );
 
-                      if (result != null) {
-                        if (result is SimpleLocationResult) {
-                          point2 = GeoPoint(
-                            latitude: result.latitude,
-                            longitude: result.longitude,
-                          );
-                          reachController.text =
-                              "${point2?.latitude},${point2?.longitude}";
-                          setState(() {});
-                        }
+                      if (result != null && result is Map) {
+                        point2 = GeoPoint(
+                          latitude: result['lat'],
+                          longitude: result['lng'],
+                        );
+                        reachController.text = result['address'] ?? '';
+                        setState(() {});
                       }
+
                     },
                     child: TextField(
                       enabled: false,
@@ -192,7 +186,18 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoute.waitingDriver);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoute.waitingDriver,
+                    arguments: {
+                      'pickupAddress': pickUpController.text,
+                      'dropAddress': reachController.text,
+                      'date': _getDateText(),
+                      'time': _getTimeText(),
+                      'carType': selectedCarType,
+                      'rideType': selectedTripType,
+                    },
+                  );
                 },
                 child: Text(
                   'Next',

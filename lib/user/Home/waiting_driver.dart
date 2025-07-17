@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
@@ -9,18 +8,25 @@ class WaitingDriver extends StatefulWidget {
 
   @override
   State<WaitingDriver> createState() => _WaitingDriverState();
-
 }
 
 class _WaitingDriverState extends State<WaitingDriver> {
+  late Map<String, dynamic> bookingDetails;
 
   @override
-  void initState() {
-    Timer(Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, AppRoute.userRideDetailScreen);
-    },);
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    bookingDetails = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoute.userRideDetailScreen,
+        arguments: bookingDetails,
+      );
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,11 +34,14 @@ class _WaitingDriverState extends State<WaitingDriver> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
+          const Text(
             "Waiting for \n    Driver",
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: 30),
           ),
-          Center(child: Image.asset("assets/car_running2.gif",height: 320,)),
+          Center(
+            child: Image.asset("assets/car_running2.gif", height: 320),
+          ),
         ],
       ),
     );

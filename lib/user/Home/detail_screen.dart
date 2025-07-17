@@ -5,7 +5,23 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class UserRideDetailScreen extends StatefulWidget {
-  const UserRideDetailScreen({Key? key}) : super(key: key);
+  final String pickupAddress;
+  final String dropAddress;
+  final String date;
+  final String time;
+  final String carType;
+  final String rideType;
+
+  const UserRideDetailScreen({
+    Key? key,
+    required this.pickupAddress,
+    required this.dropAddress,
+    required this.date,
+    required this.time,
+    required this.carType,
+    required this.rideType,
+  }) : super(key: key);
+
 
   @override
   State<UserRideDetailScreen> createState() => _UserRideDetailScreenState();
@@ -32,13 +48,22 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
     });
   }
 
+  late Map<String, dynamic> bookingDetails;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    bookingDetails = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AColor().White,
       appBar: AppBar(
         title: const Text('Ride Details'),
-        backgroundColor: Colors.white,
+        backgroundColor: AColor().White,
       ),
       body: Column(children: [_map(), _detailBox(), Spacer(), _cancelBtn()]),
     );
@@ -100,23 +125,20 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          border: Border.all(color: AColor().grey400),
+          color: AColor().White,
+          border: Border.all(color: AColor().grey300),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            _DetailText(label: "Pickup Address:", value: "123 Main Street, Ahmedabad"),
-            SizedBox(height: 15),
-            _DetailText(label: "Date:", value: "17 July 2025"),
-            SizedBox(height: 15),
-            _DetailText(label: "Time:", value: "10:00 AM"),
-            SizedBox(height: 15),
-            _DetailText(label: "Car Type:", value: "Sedan"),
-            SizedBox(height: 15),
-            _DetailText(label: "Ride Type:", value: "One Way"),
-            SizedBox(height: 15),
-            _DetailText(label: "Estimate:", value: "₹250"),
+          children: [
+            _DetailText(label: "Pickup Address:", value: bookingDetails['pickupAddress'] ?? ''),
+            _DetailText(label: "Reach Place:", value: bookingDetails['dropAddress'] ?? ''),
+            _DetailText(label: "Date:", value: bookingDetails['date'] ?? ''),
+            _DetailText(label: "Time:", value: bookingDetails['time'] ?? ''),
+            _DetailText(label: "Car Type:", value: bookingDetails['carType'] ?? ''),
+            _DetailText(label: "Ride Type:", value: bookingDetails['rideType'] ?? ''),
+            _DetailText(label: "Estimate:", value: "₹250"), // You can make this dynamic later
           ],
         ),
       ),
@@ -166,10 +188,9 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    BottomBarScreen(initialIndex: 0), // Home tab
+                builder: (_) => BottomBarScreen(initialIndex: 0), // Home tab
               ),
-                  (route) => false,
+              (route) => false,
             );
           },
           child: Text('Cancel Ride', style: TextStyle(color: AColor().White)),
@@ -178,7 +199,6 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
     );
   }
 }
-
 
 class _DetailText extends StatelessWidget {
   final String label;
@@ -190,24 +210,15 @@ class _DetailText extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: TextStyle(
-          fontSize: 15,
-          color: Colors.black,
-        ),
+        style: TextStyle(fontSize: 15, color: Colors.black),
         children: [
           TextSpan(
             text: "$label ",
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
           ),
-          TextSpan(
-            text: value,
-          ),
+          TextSpan(text: value),
         ],
       ),
     );
   }
 }
-

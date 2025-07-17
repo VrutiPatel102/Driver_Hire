@@ -1,3 +1,4 @@
+import 'package:driver_hire/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as coordinates;
@@ -68,10 +69,10 @@ class _LocationPickerState extends State<LocationPicker> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AColor().White,
       appBar: AppBar(
         title: Text(widget.appBarTitle),
-        backgroundColor: widget.appBarColor,
-        foregroundColor: widget.appBarTextColor,
+        backgroundColor: AColor().White,
       ),
       body: Column(
         children: [
@@ -80,13 +81,20 @@ class _LocationPickerState extends State<LocationPicker> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 "Address: $address",
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),
               ),
             ),
           Expanded(child: _osmWidget()),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AColor().Black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+
             onPressed: getLocation,
-            child: const Text("Select This Location"),
+            child:  Text('Select this Location',style: TextStyle(color: AColor().White),),
           ),
         ],
       ),
