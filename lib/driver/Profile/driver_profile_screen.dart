@@ -4,6 +4,7 @@ import 'package:driver_hire/color.dart';
 import '../../navigation/appRoute.dart';
 
 class DriverProfileScreen extends StatelessWidget {
+
   const DriverProfileScreen({super.key});
 
   void _showLogoutDialog(BuildContext context) {

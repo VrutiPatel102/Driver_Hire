@@ -1,5 +1,4 @@
 import 'package:driver_hire/bottom_bar.dart';
-
 import 'package:driver_hire/choose_driverORuser.dart';
 import 'package:driver_hire/create_newPwd.dart';
 import 'package:driver_hire/driver/Home/driver_ride_detail_screen.dart';
@@ -14,12 +13,10 @@ import 'package:driver_hire/register_screen.dart';
 import 'package:driver_hire/splash_screen.dart';
 import 'package:driver_hire/user/Home/book_driver.dart';
 import 'package:flutter/material.dart';
-
 import '../user/Home/detail_screen.dart';
 import '../user/Home/waiting_driver.dart';
 
 class RouteGenerator{
-
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoute.splash:
@@ -83,9 +80,9 @@ class RouteGenerator{
           builder: (context) => WaitingDriver(),
           settings: settings,
         );
-      case AppRoute.detailScreen:
+      case AppRoute.userRideDetailScreen:
         return MaterialPageRoute(
-          builder: (context) => DetailScreen(),
+          builder: (context) => UserRideDetailScreen(),
           settings: settings,
         );
       case AppRoute.rideRequestDetailScreen:
