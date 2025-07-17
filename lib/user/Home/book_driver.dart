@@ -1,6 +1,8 @@
+import 'package:driver_hire/Address_Pickup_drop/location_picker.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'map_picker_screen.dart';
 
@@ -12,6 +14,11 @@ class BookDriverScreen extends StatefulWidget {
 }
 
 class _BookDriverScreenState extends State<BookDriverScreen> {
+  TextEditingController pickUpController = TextEditingController();
+  TextEditingController reachController = TextEditingController();
+
+  GeoPoint? point1;
+  GeoPoint? point2;
   String selectedTripType = 'Round trip';
   String selectedCarType = 'SUV';
 
@@ -27,91 +34,173 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
       appBar: _buildAppbar(),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Book a driver',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 40),
-              const Text(
-                'Please Select your Trip type',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  _tripTypeButton('One way'),
-                  const SizedBox(width: 16),
-                  _tripTypeButton('Round trip'),
-                ],
-              ),
-              const SizedBox(height: 40),
-              const Text(
-                'Select Car Type',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _carTypeOption('Sedan', 'assets/image 1.png'),
-                  _carTypeOption('EV', 'assets/image 2.png'),
-                  _carTypeOption('SUV', 'assets/image 3.png'),
-                ],
-              ),
-              const SizedBox(height: 40),
-              Row(
-                children: [
-                  Expanded(child: _locationInput('PickUp Address', true)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _locationInput('Reach Place', false)),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: _iconInputField(
-                      Icons.calendar_today,
-                      _getDateText(),
-                      _selectDate,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Book a driver',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 25),
+            const Text(
+              'Please Select your Trip type',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _tripTypeButton('One way'),
+                const SizedBox(width: 16),
+                _tripTypeButton('Round trip'),
+              ],
+            ),
+            const SizedBox(height: 40),
+            const Text(
+              'Select Car Type',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _carTypeOption('Sedan', 'assets/image 1.png'),
+                _carTypeOption('EV', 'assets/image 2.png'),
+                _carTypeOption('SUV', 'assets/image 3.png'),
+              ],
+            ),
+            const SizedBox(height: 40),
+            Text(
+              "Pickup & Destination",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      var result = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => LocationPicker(
+                            initialLatitude: 23.0273,
+                            initialLongitude: 72.5607,
+                          ),
+                        ),
+                      );
+
+                      if (result != null) {
+                        if (result is SimpleLocationResult) {
+                          point1 = GeoPoint(
+                            latitude: result.latitude,
+                            longitude: result.longitude,
+                          );
+                          pickUpController.text =
+                              "${point1?.latitude},${point1?.longitude}";
+                          setState(() {});
+                        }
+                      }
+                    },
+                    child: TextField(
+                      enabled: false,
+                      controller: pickUpController,
+                      decoration: InputDecoration(
+                        hintText: "PickUp Address",
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 8,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _iconInputField(
-                      Icons.access_time,
-                      _getTimeText(),
-                      _selectTime,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 60),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AColor().Black,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                      Navigator.pushNamed(context,AppRoute.waitingDriver);
-                  },
-                  child: Text(
-                    'Next',
-                    style: TextStyle(color: AColor().White, fontSize: 18),
                   ),
                 ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      var result = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => LocationPicker(
+                            initialLatitude: 23.0273,
+                            initialLongitude: 72.5607,
+                          ),
+                        ),
+                      );
+
+                      if (result != null) {
+                        if (result is SimpleLocationResult) {
+                          point2 = GeoPoint(
+                            latitude: result.latitude,
+                            longitude: result.longitude,
+                          );
+                          reachController.text =
+                              "${point2?.latitude},${point2?.longitude}";
+                          setState(() {});
+                        }
+                      }
+                    },
+                    child: TextField(
+                      enabled: false,
+                      controller: reachController,
+                      decoration: InputDecoration(
+                        hintText: "Reach Place",
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 8,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              "Date & Time",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _iconInputField(
+                    Icons.calendar_today,
+                    _getDateText(),
+                    _selectDate,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _iconInputField(
+                    Icons.access_time,
+                    _getTimeText(),
+                    _selectTime,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AColor().Black,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoute.waitingDriver);
+                },
+                child: Text(
+                  'Next',
+                  style: TextStyle(color: AColor().White, fontSize: 18),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -173,41 +262,6 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
           ],
         ),
       ],
-    );
-  }
-
-  /// === Location Input ===
-  Widget _locationInput(String hint, bool isPickup) {
-    String value = isPickup ? pickupAddress : reachPlace;
-    return InkWell(
-      onTap: () async {
-        final result = await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const MapPickerScreen()),
-        );
-        if (result != null && result is LatLng) {
-          setState(() {
-            String locationText =
-                'Lat: ${result.latitude.toStringAsFixed(4)}, Lng: ${result.longitude.toStringAsFixed(4)}';
-            if (isPickup) {
-              pickupAddress = locationText;
-            } else {
-              reachPlace = locationText;
-            }
-          });
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          value.isEmpty ? hint : value,
-          style: const TextStyle(fontSize: 16),
-        ),
-      ),
     );
   }
 
