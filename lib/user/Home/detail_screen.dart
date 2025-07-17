@@ -21,16 +21,17 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
   void _zoomIn() {
     setState(() {
       _currentZoom += 1;
-      _mapController.move(_mapController.center, _currentZoom);
+      _mapController.move(_mapController.camera.center, _currentZoom);
     });
   }
 
   void _zoomOut() {
     setState(() {
       _currentZoom -= 1;
-      _mapController.move(_mapController.center, _currentZoom);
+      _mapController.move(_mapController.camera.center, _currentZoom);
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +52,8 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
           child: FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              center: startPoint,
-              zoom: _currentZoom,
+              initialCenter: startPoint,
+              initialZoom: _currentZoom,
               maxZoom: 18,
               minZoom: 4,
             ),
