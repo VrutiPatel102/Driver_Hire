@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "939730294445",
+    "project_id": "driver-hire-1108a",
+    "storage_bucket": "driver-hire-1108a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:939730294445:android:c790ba82236bf239315824",
+        "android_client_info": {
+          "package_name": "com.example.driver_hire"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAk2vcXWNW_yIno8Hs0Nvkd9qpnrWshWo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

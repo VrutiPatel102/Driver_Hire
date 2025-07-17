@@ -140,7 +140,18 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       decoration: InputDecoration(
         errorMaxLines: 3,
-        labelText: 'Password',
+        hintText: 'Password',
+        filled: true,
+        fillColor: AColor().grey100,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AColor().green),
+        ),
         suffixIcon: IconButton(
           icon: Icon(
             _obscurePassword ? Icons.visibility_off : Icons.visibility,
