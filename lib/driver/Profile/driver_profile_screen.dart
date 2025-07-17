@@ -110,11 +110,11 @@ class DriverProfileScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.only(left: 40, top: 40, bottom: 90),
               decoration: BoxDecoration(
-                color: AColor().green.withOpacity(0.1),
+                color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.shade200,
                     spreadRadius: 2,
                     blurRadius: 10,
                   )
