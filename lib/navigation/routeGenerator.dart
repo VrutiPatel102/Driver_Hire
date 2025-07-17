@@ -80,11 +80,22 @@ class RouteGenerator{
           builder: (context) => WaitingDriver(),
           settings: settings,
         );
+
       case AppRoute.userRideDetailScreen:
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-          builder: (context) => UserRideDetailScreen(),
+          builder: (context) => UserRideDetailScreen(
+            pickupAddress: args['pickupAddress'] ?? '',
+            dropAddress: args['dropAddress'] ?? '',
+            date: args['date'] ?? '',
+            time: args['time'] ?? '',
+            carType: args['carType'] ?? '',
+            rideType: args['rideType'] ?? '',
+          ),
           settings: settings,
         );
+
+
       case AppRoute.rideRequestDetailScreen:
         return MaterialPageRoute(
           builder: (context) => RideRequestDetailScreen(),
