@@ -138,7 +138,7 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
             _DetailText(label: "Time:", value: bookingDetails['time'] ?? ''),
             _DetailText(label: "Car Type:", value: bookingDetails['carType'] ?? ''),
             _DetailText(label: "Ride Type:", value: bookingDetails['rideType'] ?? ''),
-            _DetailText(label: "Estimate:", value: "₹250"), // You can make this dynamic later
+            _DetailText(label: "Estimate:", value: "₹250"),
           ],
         ),
       ),
@@ -176,7 +176,7 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
       padding: const EdgeInsets.all(16),
       child: SizedBox(
         width: double.infinity,
-        height: 48,
+        height: 60,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AColor().Black,
