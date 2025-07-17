@@ -34,18 +34,18 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             SizedBox(height: 40),
+            SizedBox(height: 40),
             _logo(),
-             SizedBox(height: 40),
+            SizedBox(height: 40),
             _welcomeText(),
-             SizedBox(height: 20),
+            SizedBox(height: 20),
             _emailField(),
-             SizedBox(height: 16),
+            SizedBox(height: 16),
             _passwordField(),
-             SizedBox(height: 10),
+            SizedBox(height: 10),
             _forgotPwd(),
             _loginButton(),
-             Spacer(),
+            Spacer(),
             _regField(),
           ],
         ),
@@ -125,24 +125,22 @@ class _LoginScreenState extends State<LoginScreen> {
         if (value == null || value.isEmpty) {
           return 'Please enter your password';
         }
-        if (value.length < 6) {
-          return 'Password must be at least 6 characters';
+        if (value.length < 8) {
+          return 'Password must be at least 8 characters';
+        }
+
+        final passwordRegex = RegExp(
+          r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~%^()_+={}\[\]:;<>,.?/-]).{8,}$',
+        );
+
+        if (!passwordRegex.hasMatch(value)) {
+          return 'Password must contain uppercase, lowercase, number, and special character';
         }
         return null;
       },
       decoration: InputDecoration(
-        hintText: 'Enter your password',
-        filled: true,
-        fillColor: AColor().grey100,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: AColor().green, width: 2),
-        ),
+        errorMaxLines: 3,
+        labelText: 'Password',
         suffixIcon: IconButton(
           icon: Icon(
             _obscurePassword ? Icons.visibility_off : Icons.visibility,
