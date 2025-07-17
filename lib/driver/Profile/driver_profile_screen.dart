@@ -11,22 +11,19 @@ class DriverProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title:  Text('Confirm Logout',style: TextStyle(fontSize: 17),),
-        content:  Text('Are you sure you want to logout?'),
+        title: Text('Confirm Logout', style: TextStyle(fontSize: 17)),
+        content: Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Cancel', style: TextStyle(color: AColor().Black)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AColor().green,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AColor().green),
             onPressed: () {
-              Navigator.pop(context);
-
+              Navigator.pushReplacementNamed(context, AppRoute.chooseScreen);
             },
-            child:  Text('Logout', style: TextStyle(color: AColor().White)),
+            child: Text('Logout', style: TextStyle(color: AColor().White)),
           ),
         ],
       ),
@@ -37,8 +34,8 @@ class DriverProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title:  Text('Delete Account'),
-        content:  Text(
+        title: Text('Delete Account'),
+        content: Text(
           'This action cannot be undone.\nAre you sure you want to delete your account?',
         ),
         actions: [
@@ -47,14 +44,12 @@ class DriverProfileScreen extends StatelessWidget {
             child: Text('Cancel', style: TextStyle(color: AColor().Black)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AColor().Red,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AColor().Red),
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.pushReplacementNamed(context, AppRoute.register);
             },
-            child:  Text('Delete',style: TextStyle(color: AColor().White),),
+            child: Text('Delete', style: TextStyle(color: AColor().White)),
           ),
         ],
       ),
@@ -72,7 +67,7 @@ class DriverProfileScreen extends StatelessWidget {
         title: Row(
           children: [
             Icon(Icons.person_outline, color: AColor().Black),
-            const SizedBox(width: 8),
+             SizedBox(width: 8),
             Text(
               'Profile',
               style: TextStyle(
@@ -81,21 +76,21 @@ class DriverProfileScreen extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const Spacer(),
+             Spacer(),
             GestureDetector(
               onTap: () => _showLogoutDialog(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AColor().green100,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   'LOGOUT',
-                  style: TextStyle(
-                    color: AColor().Red,
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(color: AColor().Red, fontSize: 15),
                 ),
               ),
             ),
@@ -117,10 +112,10 @@ class DriverProfileScreen extends StatelessWidget {
                     color: Colors.grey.shade200,
                     spreadRadius: 2,
                     blurRadius: 10,
-                  )
+                  ),
                 ],
               ),
-              child: const Column(
+              child:  Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Name :', style: TextStyle(fontSize: 20)),
@@ -133,7 +128,7 @@ class DriverProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -154,7 +149,7 @@ class DriverProfileScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const Spacer(),
+             Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -170,10 +165,7 @@ class DriverProfileScreen extends StatelessWidget {
                 },
                 child: Text(
                   'Update',
-                  style: TextStyle(
-                    color: AColor().White,
-                    fontSize: 18,
-                  ),
+                  style: TextStyle(color: AColor().White, fontSize: 18),
                 ),
               ),
             ),

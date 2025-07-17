@@ -10,10 +10,14 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -34,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         onPressed: () {
           Navigator.pop(context);
         },
-        icon:  Icon(Icons.arrow_back_ios, size: 16),
+        icon: Icon(Icons.arrow_back_ios, size: 16),
         padding: const EdgeInsets.all(13),
         style: IconButton.styleFrom(
           backgroundColor: Colors.transparent,
@@ -50,26 +54,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildBody() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-           SizedBox(height: 10),
-          _logo(),
-           SizedBox(height: 20),
-          _welcomeText(),
-           SizedBox(height: 15),
-          _usernameField(),
-           SizedBox(height: 14),
-          _emailField(),
-           SizedBox(height: 14),
-          _passwordField(),
-           SizedBox(height: 14),
-          _confirmPasswordField(),
-           SizedBox(height: 20),
-          _registerBtn(),
-           Spacer(),
-          _loginLink(),
-        ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 10),
+            _logo(),
+            SizedBox(height: 20),
+            _welcomeText(),
+            SizedBox(height: 15),
+            _usernameField(),
+            SizedBox(height: 14),
+            _emailField(),
+            SizedBox(height: 14),
+            _passwordField(),
+            SizedBox(height: 14),
+            _confirmPasswordField(),
+            SizedBox(height: 20),
+            _registerBtn(),
+            Spacer(),
+            _loginLink(),
+          ],
+        ),
       ),
     );
   }
@@ -108,104 +115,85 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _usernameField() {
-    return TextField(
+    return TextFormField(
       controller: _nameController,
-      decoration: InputDecoration(
-        hintText: 'User name',
-        filled: true,
-        fillColor: AColor().grey100,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: AColor().green),
-        ),
-      ),
+      decoration: _inputDecoration('User name'),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Username is required';
+        }
+        return null;
+      },
     );
   }
 
   Widget _emailField() {
-    return TextField(
+    return TextFormField(
       controller: _emailController,
-      decoration: InputDecoration(
-        hintText: 'Email',
-        filled: true,
-        fillColor: AColor().grey100,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: AColor().green),
-        ),
-      ),
+      decoration: _inputDecoration('Email'),
+      keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Email is required';
+        }
+        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+        if (!emailRegex.hasMatch(value)) {
+          return 'Enter a valid email';
+        }
+        return null;
+      },
     );
   }
 
   Widget _passwordField() {
-    return TextField(
+    return TextFormField(
       controller: _passwordController,
       obscureText: _obscurePassword,
-      decoration: InputDecoration(
-        hintText: 'Enter your password',
-        filled: true,
-        fillColor: AColor().grey100,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: AColor().green),
-        ),
-        suffixIcon: IconButton(
+      decoration: _inputDecoration(
+        'Enter your password',
+        suffix: IconButton(
           icon: Icon(
             _obscurePassword ? Icons.visibility_off : Icons.visibility,
           ),
-          onPressed: () {
-            setState(() {
-              _obscurePassword = !_obscurePassword;
-            });
-          },
+          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
         ),
       ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Password is required';
+        }
+        if (value.length < 6) {
+          return 'Password must be at least 6 characters';
+        }
+        return null;
+      },
     );
   }
 
   Widget _confirmPasswordField() {
-    return TextField(
+    return TextFormField(
       controller: _confirmPasswordController,
       obscureText: _obscureConfirmPassword,
-      decoration: InputDecoration(
-        hintText: 'Confirm password',
-        filled: true,
-        fillColor: AColor().grey100,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: AColor().green),
-        ),
-        suffixIcon: IconButton(
+      decoration: _inputDecoration(
+        'Confirm password',
+        suffix: IconButton(
           icon: Icon(
             _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
           ),
-          onPressed: () {
-            setState(() {
-              _obscureConfirmPassword = !_obscureConfirmPassword;
-            });
-          },
+          onPressed: () => setState(
+            () => _obscureConfirmPassword = !_obscureConfirmPassword,
+          ),
         ),
       ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Confirm your password';
+        }
+        if (value != _passwordController.text) {
+          return 'Passwords do not match';
+        }
+        return null;
+      },
     );
   }
 
@@ -221,7 +209,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
         onPressed: () {
-          Navigator.pushNamed(context, AppRoute.login);
+          if (_formKey.currentState!.validate()) {
+            Navigator.pushNamed(context, AppRoute.login);
+          }
         },
         child: Text(
           'Register',
@@ -236,7 +226,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: TextButton(
         onPressed: () {
           Navigator.pop(context);
-          // Or: Navigator.pushNamed(context, AppRoute.login);
         },
         child: Text.rich(
           TextSpan(
@@ -256,6 +245,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, {Widget? suffix}) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: AColor().grey100,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.transparent),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: AColor().green),
+      ),
+      suffixIcon: suffix,
     );
   }
 }

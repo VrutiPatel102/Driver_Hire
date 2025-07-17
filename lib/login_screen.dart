@@ -3,7 +3,7 @@ import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
-  final String loginAs; // either 'user' or 'driver'
+  final String loginAs;
 
   const LoginScreen({super.key, required this.loginAs});
 
@@ -12,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -28,23 +29,26 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildBody() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 40),
-          _logo(),
-          SizedBox(height: 40),
-          _welcomeText(),
-          SizedBox(height: 20),
-          _email(),
-          SizedBox(height: 16),
-          _pwdfield(),
-          SizedBox(height: 10),
-          _forgotPwd(),
-          _loginbtn(),
-          Spacer(),
-          _regField(),
-        ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             SizedBox(height: 40),
+            _logo(),
+             SizedBox(height: 40),
+            _welcomeText(),
+             SizedBox(height: 20),
+            _emailField(),
+             SizedBox(height: 16),
+            _passwordField(),
+             SizedBox(height: 10),
+            _forgotPwd(),
+            _loginButton(),
+             Spacer(),
+            _regField(),
+          ],
+        ),
       ),
     );
   }
@@ -82,9 +86,20 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _email() {
-    return TextField(
+  Widget _emailField() {
+    return TextFormField(
       controller: _emailController,
+      keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Please enter your email';
+        }
+        final emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$');
+        if (!emailRegex.hasMatch(value.trim())) {
+          return 'Please enter a valid email address';
+        }
+        return null;
+      },
       decoration: InputDecoration(
         hintText: 'Enter your email',
         filled: true,
@@ -102,10 +117,19 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _pwdfield() {
-    return TextField(
+  Widget _passwordField() {
+    return TextFormField(
       controller: _passwordController,
       obscureText: _obscurePassword,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your password';
+        }
+        if (value.length < 6) {
+          return 'Password must be at least 6 characters';
+        }
+        return null;
+      },
       decoration: InputDecoration(
         hintText: 'Enter your password',
         filled: true,
@@ -148,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _loginbtn() {
+  Widget _loginButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -160,10 +184,12 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         onPressed: () {
-          if (widget.loginAs == 'user') {
-            Navigator.pushNamed(context, AppRoute.bottombar); // user home
-          } else if (widget.loginAs == 'driver') {
-            Navigator.pushNamed(context, AppRoute.driverBottombar); // driver-specific screen
+          if (_formKey.currentState!.validate()) {
+            if (widget.loginAs == 'user') {
+              Navigator.pushNamed(context, AppRoute.bottombar);
+            } else if (widget.loginAs == 'driver') {
+              Navigator.pushNamed(context, AppRoute.driverBottombar);
+            }
           }
         },
         child: Text(
@@ -209,12 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pop(context);
         },
         icon: const Icon(Icons.arrow_back_ios, size: 16),
-        padding: const EdgeInsets.only(
-          left: 16,
-          top: 13,
-          right: 13,
-          bottom: 13,
-        ),
+        padding: const EdgeInsets.all(13),
         style: IconButton.styleFrom(
           backgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(
