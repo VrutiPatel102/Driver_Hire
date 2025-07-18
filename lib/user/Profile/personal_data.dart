@@ -120,8 +120,21 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
         TextFormField(
           controller: controller,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: AColor().grey300,
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none, // default border
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: AColor().green,
+                width: 2,
+              ), // green when focused
+            ),
           ),
           validator: validator,
         ),
@@ -145,7 +158,17 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
               .toList(),
           onChanged: (value) => setState(() => _selectedGender = value!),
           decoration: InputDecoration(
+            filled: true,
+            fillColor: AColor().grey300,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: AColor().green, width: 2),
+            ),
           ),
         ),
       ],
