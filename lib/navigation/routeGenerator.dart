@@ -12,6 +12,7 @@ import 'package:driver_hire/pwd_changed.dart';
 import 'package:driver_hire/register_screen.dart';
 import 'package:driver_hire/splash_screen.dart';
 import 'package:driver_hire/user/Home/book_driver.dart';
+import 'package:driver_hire/user/Profile/personal_data.dart';
 import 'package:flutter/material.dart';
 import '../user/Home/detail_screen.dart';
 import '../user/Home/waiting_driver.dart';
@@ -78,6 +79,11 @@ class RouteGenerator{
       case AppRoute.waitingDriver:
         return MaterialPageRoute(
           builder: (context) => WaitingDriver(),
+          settings: settings,
+        );
+      case AppRoute.personalData:
+        return MaterialPageRoute(
+          builder: (context) => PersonalDataScreen(),
           settings: settings,
         );
 
