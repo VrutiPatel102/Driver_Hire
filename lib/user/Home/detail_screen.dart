@@ -133,7 +133,7 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _DetailText(label: "Pickup Address:", value: bookingDetails['pickupAddress'] ?? ''),
-            _DetailText(label: "Reach Place:", value: bookingDetails['dropAddress'] ?? ''),
+            _DetailText(label: "Drop Address:", value: bookingDetails['dropAddress'] ?? ''),
             _DetailText(label: "Date:", value: bookingDetails['date'] ?? ''),
             _DetailText(label: "Time:", value: bookingDetails['time'] ?? ''),
             _DetailText(label: "Car Type:", value: bookingDetails['carType'] ?? ''),
