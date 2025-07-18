@@ -2,7 +2,8 @@ import 'package:driver_hire/Address_Pickup_drop/location_picker.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart' as osm;
 
 class BookDriverScreen extends StatefulWidget {
   const BookDriverScreen({super.key});
@@ -15,197 +16,234 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
   TextEditingController pickUpController = TextEditingController();
   TextEditingController reachController = TextEditingController();
 
-  GeoPoint? point1;
-  GeoPoint? point2;
+  osm.GeoPoint? point1;
+  osm.GeoPoint? point2;
+
   String selectedTripType = 'Round trip';
   String selectedCarType = 'SUV';
 
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   String pickupAddress = '';
-  String reachPlace = '';
+  String dropAddress = '';
+  double estimatedFare=200;
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AColor().White,
       appBar: _buildAppbar(),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Book a driver',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 25),
-            const Text(
-              'Please Select your Trip type',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _tripTypeButton('One way'),
-                const SizedBox(width: 16),
-                _tripTypeButton('Round trip'),
-              ],
-            ),
-            const SizedBox(height: 40),
-            const Text(
-              'Select Car Type',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _carTypeOption('Sedan', 'assets/image 1.png'),
-                _carTypeOption('EV', 'assets/image 2.png'),
-                _carTypeOption('SUV', 'assets/image 3.png'),
-              ],
-            ),
-            const SizedBox(height: 40),
-            Text(
-              "Pickup & Destination",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      var result = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => LocationPicker(
-                            initialLatitude: 23.0273,
-                            initialLongitude: 72.5607,
-                          ),
-                        ),
-                      );
+      body: _builBody(),
+    );
+  }
 
-                      if (result != null && result is Map) {
-                        point1 = GeoPoint(
-                          latitude: result['lat'],
-                          longitude: result['lng'],
-                        );
-                        pickUpController.text = result['address'] ?? '';
-                        setState(() {});
-                      }
-
-                    },
-                    child: TextField(
-                      enabled: false,
-                      controller: pickUpController,
-                      decoration: InputDecoration(
-                        hintText: "PickUp Address",
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 8,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 20),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      var result = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => LocationPicker(
-                            initialLatitude: 23.0273,
-                            initialLongitude: 72.5607,
-                          ),
-                        ),
-                      );
-
-                      if (result != null && result is Map) {
-                        point2 = GeoPoint(
-                          latitude: result['lat'],
-                          longitude: result['lng'],
-                        );
-                        reachController.text = result['address'] ?? '';
-                        setState(() {});
-                      }
-
-                    },
-                    child: TextField(
-                      enabled: false,
-                      controller: reachController,
-                      decoration: InputDecoration(
-                        hintText: "Reach Place",
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 8,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "Date & Time",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: _iconInputField(
-                    Icons.calendar_today,
-                    _getDateText(),
-                    _selectDate,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _iconInputField(
-                    Icons.access_time,
-                    _getTimeText(),
-                    _selectTime,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AColor().Black,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    AppRoute.waitingDriver,
-                    arguments: {
-                      'pickupAddress': pickUpController.text,
-                      'dropAddress': reachController.text,
-                      'date': _getDateText(),
-                      'time': _getTimeText(),
-                      'carType': selectedCarType,
-                      'rideType': selectedTripType,
-                    },
-                  );
-                },
-                child: Text(
-                  'Next',
-                  style: TextStyle(color: AColor().White, fontSize: 18),
+  Widget _builBody() {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Book a driver',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 25),
+          Text(
+            'Please Select your Trip type',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              _tripTypeButton('One way'),
+              SizedBox(width: 16),
+              _tripTypeButton('Round trip'),
+            ],
+          ),
+          SizedBox(height: 40),
+          Text(
+            'Select Car Type',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _carTypeOption('Sedan', 'assets/image 1.png'),
+              _carTypeOption('EV', 'assets/image 2.png'),
+              _carTypeOption('SUV', 'assets/image 3.png'),
+            ],
+          ),
+          SizedBox(height: 40),
+          Text(
+            "Pickup & Destination",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 20),
+          Row(
+            children: [_pickupAddress(), SizedBox(width: 20), _dropAddress()],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            "Date & Time",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _iconInputField(
+                  Icons.calendar_today,
+                  _getDateText(),
+                  _selectDate,
                 ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _iconInputField(
+                  Icons.access_time,
+                  _getTimeText(),
+                  _selectTime,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          _nextBtn(),
+        ],
+      ),
+    );
+  }
+
+  Widget _nextBtn() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AColor().Black,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: () async {
+          if (pickUpController.text.isEmpty ||
+              reachController.text.isEmpty ||
+              selectedDate == null ||
+              selectedTime == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Please fill all required fields")),
+            );
+            return;
+          }
+          try {
+            await firestore.FirebaseFirestore.instance
+                .collection('bookings')
+                .add({
+                  'pickupAddress': pickUpController.text,
+                  'dropAddress': reachController.text,
+                  'date': _getDateText(),
+                  'time': _getTimeText(),
+                  'carType': selectedCarType,
+                  'rideType': selectedTripType,
+                  'createdAt': firestore.FieldValue.serverTimestamp(),
+                  'fare': 200,
+                });
+
+            Navigator.pushNamed(
+              context,
+              AppRoute.waitingDriver,
+              arguments: {
+                'pickupAddress': pickUpController.text,
+                'dropAddress': reachController.text,
+                'date': _getDateText(),
+                'time': _getTimeText(),
+                'carType': selectedCarType,
+                'rideType': selectedTripType,
+              },
+            );
+          } catch (e) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text("Failed to book: $e")));
+          }
+        },
+
+        child: Text(
+          'Next',
+          style: TextStyle(color: AColor().White, fontSize: 18),
+        ),
+      ),
+    );
+  }
+
+  Widget _dropAddress() {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () async {
+          var result = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => LocationPicker(
+                initialLatitude: 23.0273,
+                initialLongitude: 72.5607,
+              ),
             ),
-          ],
+          );
+          if (result != null && result is Map) {
+            point2 = osm.GeoPoint(
+              latitude: result['lat'],
+              longitude: result['lng'],
+            );
+            reachController.text = result['address'] ?? '';
+            setState(() {});
+          }
+        },
+        child: TextField(
+          enabled: false,
+          controller: reachController,
+          decoration: InputDecoration(
+            hintText: "Drop Address",
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _pickupAddress() {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () async {
+          var result = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => LocationPicker(
+                initialLatitude: 23.0273,
+                initialLongitude: 72.5607,
+              ),
+            ),
+          );
+
+          if (result != null && result is Map) {
+            point1 = osm.GeoPoint(
+              latitude: result['lat'],
+              longitude: result['lng'],
+            );
+            pickUpController.text = result['address'] ?? '';
+            setState(() {});
+          }
+        },
+        child: TextField(
+          enabled: false,
+          controller: pickUpController,
+          decoration: InputDecoration(
+            hintText: "PickUp Address",
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          ),
         ),
       ),
     );

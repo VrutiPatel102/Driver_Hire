@@ -1,9 +1,14 @@
 import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+
+  final String role;
+
+  const RegisterScreen({Key? key, required this.role}) : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -208,11 +213,60 @@ class _RegisterScreenState extends State<RegisterScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: () {
+        // onPressed: () {
+        //   if (_formKey.currentState!.validate()) {
+        //     Navigator.pushNamed(context, AppRoute.chooseScreen);
+        //   }
+        // },
+        onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            Navigator.pushNamed(context, AppRoute.chooseScreen);
+            try {
+              final userCredential = await FirebaseAuth.instance
+                  .createUserWithEmailAndPassword(
+                email: _emailController.text.trim(),
+                password: _passwordController.text.trim(),
+              );
+
+              final user = userCredential.user;
+
+              if (user != null) {
+                await FirebaseFirestore.instance
+                    .collection(widget.role == 'driver' ? 'drivers' : 'users')
+                    .doc(user.uid)
+                    .set({
+                  'uid': user.uid,
+                  'name': _nameController.text.trim(),
+                  'email': _emailController.text.trim(),
+                  'createdAt': FieldValue.serverTimestamp(),
+                  'role': widget.role,
+                });
+
+                Navigator.pushNamed(context, AppRoute.chooseScreen);
+              }
+            } on FirebaseAuthException catch (e) {
+              String message = 'Registration failed';
+              if (e.code == 'email-already-in-use') {
+                message = 'Email is already registered.';
+              } else if (e.code == 'weak-password') {
+                message = 'Password is too weak.';
+              } else if (e.code == 'invalid-email') {
+                message = 'Invalid email address.';
+              }
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(message), backgroundColor: Colors.red),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Something went wrong'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           }
         },
+
         child: Text(
           'Register',
           style: TextStyle(color: AColor().White, fontSize: 18),

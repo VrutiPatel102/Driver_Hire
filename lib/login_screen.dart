@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -181,6 +183,34 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Widget _loginButton() {
+  //   return SizedBox(
+  //     width: double.infinity,
+  //     child: ElevatedButton(
+  //       style: ElevatedButton.styleFrom(
+  //         backgroundColor: AColor().Black,
+  //         padding: const EdgeInsets.symmetric(vertical: 20),
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //         ),
+  //       ),
+  //       onPressed: () {
+  //         if (_formKey.currentState!.validate()) {
+  //           if (widget.loginAs == 'user') {
+  //             Navigator.pushNamed(context, AppRoute.bottombar);
+  //           } else if (widget.loginAs == 'driver') {
+  //             Navigator.pushNamed(context, AppRoute.driverBottombar);
+  //           }
+  //         }
+  //       },
+  //       child: Text(
+  //         'Login',
+  //         style: TextStyle(color: AColor().White, fontSize: 18),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _loginButton() {
     return SizedBox(
       width: double.infinity,
@@ -192,12 +222,46 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: () {
+        onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            if (widget.loginAs == 'user') {
-              Navigator.pushNamed(context, AppRoute.bottombar);
-            } else if (widget.loginAs == 'driver') {
-              Navigator.pushNamed(context, AppRoute.driverBottombar);
+            try {
+              final userCredential = await FirebaseAuth.instance
+                  .signInWithEmailAndPassword(
+                    email: _emailController.text.trim(),
+                    password: _passwordController.text.trim(),
+                  );
+
+              final user = userCredential.user;
+              if (user != null) {
+                // Determine collection based on role
+                final collection = widget.loginAs == 'driver'
+                    ? 'drivers'
+                    : 'users';
+
+                // Save login info to Firestore
+                await FirebaseFirestore.instance
+                    .collection(collection)
+                    .doc(user.uid)
+                    .set({
+                      'email': user.email,
+                      'uid': user.uid,
+                      'loginAt': FieldValue.serverTimestamp(),
+                    }, SetOptions(merge: true));
+
+                // Navigate to appropriate screen
+                if (widget.loginAs == 'user') {
+                  Navigator.pushNamed(context, AppRoute.bottombar);
+                } else {
+                  Navigator.pushNamed(context, AppRoute.driverBottombar);
+                }
+              }
+            } on FirebaseAuthException catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(e.message ?? 'Login failed'),
+                  backgroundColor: Colors.red,
+                ),
+              );
             }
           }
         },
@@ -213,7 +277,11 @@ class _LoginScreenState extends State<LoginScreen> {
     return Center(
       child: TextButton(
         onPressed: () {
-          Navigator.pushNamed(context, AppRoute.register);
+          Navigator.pushNamed(
+            context,
+            AppRoute.register,
+            arguments: widget.loginAs,
+          );
         },
         child: Text.rich(
           TextSpan(
