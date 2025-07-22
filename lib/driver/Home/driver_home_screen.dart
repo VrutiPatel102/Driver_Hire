@@ -12,7 +12,7 @@ class DriverHomeScreen extends StatelessWidget {
       'time': '6.54 pm',
       'pickup': '1 Sky Heven Avenue, Satellite',
       'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '600',
+      'amount': '₹600',
     },
     {
       'name': 'Prakruti Shah',
@@ -20,7 +20,7 @@ class DriverHomeScreen extends StatelessWidget {
       'time': '6.54 pm',
       'pickup': '1 Sky Heven Avenue, Satellite',
       'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '600',
+      'amount': '₹600',
     },
     {
       'name': 'Prakruti Shah',
@@ -28,7 +28,7 @@ class DriverHomeScreen extends StatelessWidget {
       'time': '6.54 pm',
       'pickup': '1 Sky Heven Avenue, Satellite',
       'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '600',
+      'amount': '₹600',
     },
   ];
 
@@ -75,12 +75,12 @@ class DriverHomeScreen extends StatelessWidget {
         Navigator.pushNamed(
           context,
           AppRoute.rideRequestDetailScreen,
-          arguments: data, // Send data to details screen
+          arguments: data,
         );
       },
       child: Container(
         decoration: BoxDecoration(
-          color: AColor().green.withAlpha(26), // 26 is 10% of 255,
+          color: AColor().green.withAlpha(26),
           borderRadius: BorderRadius.circular(16),
         ),
         padding: const EdgeInsets.all(20),

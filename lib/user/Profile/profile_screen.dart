@@ -59,7 +59,7 @@ class ProfileScreen extends StatelessWidget {
     return CircleAvatar(
       radius: 45,
       backgroundColor: Color(0xFFF5F5F5),
-      child: Icon(Icons.person, size: 40, color:AColor().Grey),
+      child: Icon(Icons.person, size: 40, color: AColor().Grey),
     );
   }
 
@@ -115,10 +115,10 @@ class ProfileScreen extends StatelessWidget {
           ),
           width: double.infinity,
           height: 55,
-          child:  Center(
+          child: Center(
             child: Text(
               "Sign Out",
-              style: TextStyle(fontSize: 20, color:AColor().White),
+              style: TextStyle(fontSize: 20, color: AColor().White),
             ),
           ),
         ),
