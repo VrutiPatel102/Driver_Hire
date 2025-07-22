@@ -20,5 +20,9 @@ class AppRoute{
   static const personalData = "PersonalData_Screen";
   static const driverPersonalData = "DriverPersonalData_Screen";
 
+  static const setting = "setting_Screen";
+  static const privacyPolicy = "privacyPolicy_Screen";
+  static const termsAndCondition = "termsAndCondition_Screen";
+
 
 }

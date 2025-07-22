@@ -14,6 +14,9 @@ import 'package:driver_hire/register_screen.dart';
 import 'package:driver_hire/splash_screen.dart';
 import 'package:driver_hire/user/Home/book_driver.dart';
 import 'package:driver_hire/user/Profile/personal_data.dart';
+import 'package:driver_hire/user/Profile/privacy_screen.dart';
+import 'package:driver_hire/user/Profile/setting_screen.dart';
+import 'package:driver_hire/user/Profile/terms_con_screen.dart';
 import 'package:flutter/material.dart';
 import '../user/Home/detail_screen.dart';
 import '../user/Home/waiting_driver.dart';
@@ -117,6 +120,21 @@ class RouteGenerator{
       case AppRoute.driverRideDetailScreen:
         return MaterialPageRoute(
           builder: (context) => DriverRideDetailScreen(),
+          settings: settings,
+        );
+      case AppRoute.setting:
+        return MaterialPageRoute(
+          builder: (context) => SettingsScreen(),
+          settings: settings,
+        );
+      case AppRoute.privacyPolicy:
+        return MaterialPageRoute(
+          builder: (context) => PrivacyPolicyScreen(),
+          settings: settings,
+        );
+      case AppRoute.termsAndCondition:
+        return MaterialPageRoute(
+          builder: (context) => TermsScreen(),
           settings: settings,
         );
 
