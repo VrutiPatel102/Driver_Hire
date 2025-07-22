@@ -168,8 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-
-
   Widget _forgotPwd() {
     return Align(
       alignment: Alignment.centerRight,
@@ -196,6 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
+
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
             try {
@@ -237,6 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 }
               }
             } on FirebaseAuthException catch (e) {
+              print('❌ FirebaseAuthException: ${e.code} - ${e.message}');
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(e.message ?? 'Login failed'),
