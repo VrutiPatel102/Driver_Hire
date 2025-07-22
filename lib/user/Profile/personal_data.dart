@@ -206,13 +206,17 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
       try {
         String formattedDate = DateFormat('dd-MM-yyyy – hh:mm a').format(DateTime.now());
 
-        await FirebaseFirestore.instance.collection('users').add({
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_emailController.text.trim())
+            .set({
           'name': _nameController.text.trim(),
           'gender': _selectedGender,
           'phone': _phoneController.text.trim(),
           'email': _emailController.text.trim(),
           'saved_at': formattedDate,
         });
+
 
         _showCustomToast("Data saved successfully");
       } catch (e) {

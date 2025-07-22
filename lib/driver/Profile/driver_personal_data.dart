@@ -207,13 +207,17 @@ class _DriverPersonalDataScreenState extends State<DriverPersonalDataScreen> {
       try {
         String formattedDate = DateFormat('dd-MM-yyyy – hh:mm a').format(DateTime.now());
 
-        await FirebaseFirestore.instance.collection('drivers').add({
+        await FirebaseFirestore.instance
+            .collection('drivers')
+            .doc(_emailController.text.trim())
+            .set({
           'name': _nameController.text.trim(),
           'gender': _selectedGender,
           'phone': _phoneController.text.trim(),
           'email': _emailController.text.trim(),
           'saved_at': formattedDate,
         });
+
 
         _showCustomToast("Data saved successfully");
       } catch (e) {

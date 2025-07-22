@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: AppRoute.bottombar,
+      initialRoute: AppRoute.driverBottombar,
       onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
