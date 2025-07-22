@@ -3,6 +3,7 @@ import 'package:driver_hire/choose_driverORuser.dart';
 import 'package:driver_hire/create_newPwd.dart';
 import 'package:driver_hire/driver/Home/driver_ride_detail_screen.dart';
 import 'package:driver_hire/driver/Home/ride_request_detail_screen.dart';
+import 'package:driver_hire/driver/Profile/driver_personal_data.dart';
 import 'package:driver_hire/driver/driver_bottom_bar.dart';
 import 'package:driver_hire/forgotPwd.dart';
 import 'package:driver_hire/login_screen.dart';
@@ -85,6 +86,11 @@ class RouteGenerator{
       case AppRoute.personalData:
         return MaterialPageRoute(
           builder: (context) => PersonalDataScreen(),
+          settings: settings,
+        );
+      case AppRoute.driverPersonalData:
+        return MaterialPageRoute(
+          builder: (context) => DriverPersonalDataScreen(),
           settings: settings,
         );
 
