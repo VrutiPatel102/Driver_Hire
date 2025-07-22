@@ -259,7 +259,7 @@ class ProfileScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              const RegisterScreen(role: "user"), // adjust role
+                              const RegisterScreen(), // adjust role
                         ),
                         (Route<dynamic> route) => false,
                       );

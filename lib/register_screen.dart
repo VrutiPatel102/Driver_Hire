@@ -5,9 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final String role;
-
-  const RegisterScreen({Key? key, required this.role}) : super(key: key);
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -19,11 +17,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+
+  String? _selectedRole = 'user'; // default role
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +66,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             _logo(),
             SizedBox(height: 20),
             _welcomeText(),
+            SizedBox(height: 15),
+            _roleSelector(),
             SizedBox(height: 15),
             _usernameField(),
             SizedBox(height: 14),
@@ -118,6 +119,46 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  Widget _roleSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Registering as:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: RadioListTile<String>(
+                value: 'user',
+                groupValue: _selectedRole,
+                title: Text('User'),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedRole = value;
+                  });
+                },
+              ),
+            ),
+            Expanded(
+              child: RadioListTile<String>(
+                value: 'driver',
+                groupValue: _selectedRole,
+                title: Text('Driver'),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedRole = value;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _usernameField() {
     return TextFormField(
       controller: _nameController,
@@ -166,8 +207,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (value == null || value.trim().isEmpty) {
           return 'Password is required';
         }
-        if (value.length < 6) {
-          return 'Password must be at least 6 characters';
+        if (value.length < 8) {
+          return 'Password must be at least 8 characters';
         }
         return null;
       },
@@ -184,9 +225,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           icon: Icon(
             _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
           ),
-          onPressed: () => setState(
-            () => _obscureConfirmPassword = !_obscureConfirmPassword,
-          ),
+          onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
         ),
       ),
       validator: (value) {
@@ -217,15 +256,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             try {
               final userCredential = await FirebaseAuth.instance
                   .createUserWithEmailAndPassword(
-                    email: _emailController.text.trim(),
-                    password: _passwordController.text.trim(),
-                  );
+                email: _emailController.text.trim(),
+                password: _passwordController.text.trim(),
+              );
 
               final user = userCredential.user;
-              print("Selected role: ${widget.role}");
 
               if (user != null) {
-                final collectionName = widget.role == 'driver' ? 'drivers' : 'users';
+                final collectionName = _selectedRole == 'driver' ? 'drivers' : 'users';
 
                 await FirebaseFirestore.instance
                     .collection(collectionName)
@@ -235,10 +273,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   'name': _nameController.text.trim(),
                   'email': _emailController.text.trim(),
                   'createdAt': FieldValue.serverTimestamp(),
-                  'role': widget.role,
+                  'role': _selectedRole,
                 });
 
-                print("Registered as ${widget.role}, data saved in collection: $collectionName");
+                print("Registered as $_selectedRole, saved in collection: $collectionName");
 
                 Navigator.pushNamed(context, AppRoute.chooseScreen);
               }
@@ -257,7 +295,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SnackBar(content: Text(message), backgroundColor: Colors.red),
               );
             } catch (e) {
-              print('Registration Error: $e'); // For debug
+              print('Registration Error: $e');
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Something went wrong: ${e.toString()}'),
@@ -267,7 +305,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             }
           }
         },
-
         child: Text(
           'Register',
           style: TextStyle(color: AColor().White, fontSize: 18),

@@ -43,7 +43,7 @@ class RouteGenerator{
       case AppRoute.register:
         final role = settings.arguments as String;
         return MaterialPageRoute(
-          builder: (_) => RegisterScreen(role: role),
+          builder: (_) => RegisterScreen(),
         );
 
       case AppRoute.forgotPassword:

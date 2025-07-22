@@ -194,60 +194,61 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        // onPressed: () async {
-        //   if (_formKey.currentState!.validate()) {
-        //     try {
-        //       print('Attempting login as: ${widget.loginAs}');
-        //
-        //       final userCredential = await FirebaseAuth.instance
-        //           .signInWithEmailAndPassword(
-        //             email: _emailController.text.trim(),
-        //             password: _passwordController.text.trim(),
-        //           );
-        //
-        //       final user = userCredential.user;
-        //
-        //       if (user != null) {
-        //         final collection = widget.loginAs == 'driver'
-        //             ? 'drivers'
-        //             : 'users';
-        //
-        //         print('Logged in UID: ${user.uid}');
-        //         print('Saving login timestamp in collection: $collection');
-        //
-        //         await FirebaseFirestore.instance
-        //             .collection(collection)
-        //             .doc(user.uid)
-        //             .set({
-        //               'email': user.email,
-        //               'uid': user.uid,
-        //               'loginAt': FieldValue.serverTimestamp(),
-        //             }, SetOptions(merge: true));
-        //
-        //         print(
-        //           '➡️ Navigating to: ${widget.loginAs == 'user' ? 'User BottomBar' : 'Driver BottomBar'}',
-        //         );
-        //
-        //         if (widget.loginAs == 'user') {
-        //           Navigator.pushNamed(context, AppRoute.bottombar);
-        //         } else {
-        //           Navigator.pushNamed(context, AppRoute.driverBottombar);
-        //         }
-        //       }
-        //     } on FirebaseAuthException catch (e) {
-        //       print('❌ FirebaseAuthException: ${e.code} - ${e.message}');
-        //       ScaffoldMessenger.of(context).showSnackBar(
-        //         SnackBar(
-        //           content: Text(e.message ?? 'Login failed'),
-        //           backgroundColor: Colors.red,
-        //         ),
-        //       );
-        //     }
-        //   }
-        // },
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoute.bottombar);
+
+        onPressed: () async {
+          if (_formKey.currentState!.validate()) {
+            try {
+              print('Attempting login as: ${widget.loginAs}');
+
+              final userCredential = await FirebaseAuth.instance
+                  .signInWithEmailAndPassword(
+                    email: _emailController.text.trim(),
+                    password: _passwordController.text.trim(),
+                  );
+
+              final user = userCredential.user;
+
+              if (user != null) {
+                final collection = widget.loginAs == 'driver'
+                    ? 'drivers'
+                    : 'users';
+
+                print('Logged in UID: ${user.uid}');
+                print('Saving login timestamp in collection: $collection');
+
+                await FirebaseFirestore.instance
+                    .collection(collection)
+                    .doc(user.uid)
+                    .set({
+                      'email': user.email,
+                      'uid': user.uid,
+                      'loginAt': FieldValue.serverTimestamp(),
+                    }, SetOptions(merge: true));
+
+                print(
+                  '➡️ Navigating to: ${widget.loginAs == 'user' ? 'User BottomBar' : 'Driver BottomBar'}',
+                );
+
+                if (widget.loginAs == 'user') {
+                  Navigator.pushNamed(context, AppRoute.bottombar);
+                } else {
+                  Navigator.pushNamed(context, AppRoute.driverBottombar);
+                }
+              }
+            } on FirebaseAuthException catch (e) {
+              print('❌ FirebaseAuthException: ${e.code} - ${e.message}');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(e.message ?? 'Login failed'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         },
+        // onPressed: () {
+        //   Navigator.pushNamed(context, AppRoute.bottombar);
+        // },
         child: Text(
           'Login',
           style: TextStyle(color: AColor().White, fontSize: 18),
