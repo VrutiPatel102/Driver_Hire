@@ -17,6 +17,8 @@ class AppRoute{
   static const userRideDetailScreen ="UserRideDetail_screen";
   static const rideRequestDetailScreen = "RideRequestDetail_Screen";
   static const driverRideDetailScreen = "DriverRideDetail_Screen";
+  static const personalData = "PersonalData_Screen";
+  static const driverPersonalData = "DriverPersonalData_Screen";
 
 
 }
