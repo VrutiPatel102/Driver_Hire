@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
-
   final String role;
 
   const RegisterScreen({Key? key, required this.role}) : super(key: key);
@@ -213,25 +212,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        // onPressed: () {
-        //   if (_formKey.currentState!.validate()) {
-        //     Navigator.pushNamed(context, AppRoute.chooseScreen);
-        //   }
-        // },
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
             try {
               final userCredential = await FirebaseAuth.instance
                   .createUserWithEmailAndPassword(
-                email: _emailController.text.trim(),
-                password: _passwordController.text.trim(),
-              );
+                    email: _emailController.text.trim(),
+                    password: _passwordController.text.trim(),
+                  );
 
               final user = userCredential.user;
+              print("Selected role: ${widget.role}");
 
               if (user != null) {
+                final collectionName = widget.role == 'driver' ? 'drivers' : 'users';
+
                 await FirebaseFirestore.instance
-                    .collection(widget.role == 'driver' ? 'drivers' : 'users')
+                    .collection(collectionName)
                     .doc(user.uid)
                     .set({
                   'uid': user.uid,
@@ -241,8 +238,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   'role': widget.role,
                 });
 
+                print("Registered as ${widget.role}, data saved in collection: $collectionName");
+
                 Navigator.pushNamed(context, AppRoute.chooseScreen);
               }
+
             } on FirebaseAuthException catch (e) {
               String message = 'Registration failed';
               if (e.code == 'email-already-in-use') {
@@ -257,9 +257,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SnackBar(content: Text(message), backgroundColor: Colors.red),
               );
             } catch (e) {
+              print('Registration Error: $e'); // For debug
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Something went wrong'),
+                  content: Text('Something went wrong: ${e.toString()}'),
                   backgroundColor: Colors.red,
                 ),
               );

@@ -1,7 +1,7 @@
 import 'package:driver_hire/color.dart';
 import 'package:driver_hire/driver/Bookings/driver_booking_screen.dart';
 import 'package:driver_hire/driver/Home/driver_home_screen.dart';
-import 'package:driver_hire/driver/Profile/driver_profile_screen.dart';
+import 'package:driver_hire/driver/Profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class DriverBottomBarScreen extends StatefulWidget {

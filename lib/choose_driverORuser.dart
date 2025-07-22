@@ -99,6 +99,7 @@ class ChooseDriverUser extends StatelessWidget {
           ),
         ),
         onPressed: () {
+          print("Navigating to login as: $role");
           Navigator.pushNamed(
             context,
             AppRoute.login,
@@ -125,6 +126,7 @@ class ChooseDriverUser extends StatelessWidget {
           ),
         ),
         onPressed: () {
+          print("Navigating to login as: $role");
           Navigator.pushNamed(
             context,
             AppRoute.login,
