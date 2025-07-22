@@ -22,7 +22,7 @@ class _DriverPersonalDataScreenState extends State<DriverPersonalDataScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(backgroundColor:AColor().White,
       appBar: _buildAppBar(),
       body: _buildForm(),
       bottomNavigationBar: _buildSaveButton(),
