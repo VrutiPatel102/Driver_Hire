@@ -24,7 +24,7 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(backgroundColor: AColor().White,
       appBar: _buildAppBar(),
       body: _buildForm(),
       bottomNavigationBar: _buildSaveButton(),
