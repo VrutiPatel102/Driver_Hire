@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/color.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PersonalDataScreen extends StatefulWidget {
   const PersonalDataScreen({super.key});
@@ -199,9 +201,23 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
     );
   }
 
-  void _onSave() {
+  void _onSave() async {
     if (_formKey.currentState!.validate()) {
-      _showCustomToast("Data saved successfully");
+      try {
+        String formattedDate = DateFormat('dd-MM-yyyy – hh:mm a').format(DateTime.now());
+
+        await FirebaseFirestore.instance.collection('users').add({
+          'name': _nameController.text.trim(),
+          'gender': _selectedGender,
+          'phone': _phoneController.text.trim(),
+          'email': _emailController.text.trim(),
+          'saved_at': formattedDate,
+        });
+
+        _showCustomToast("Data saved successfully");
+      } catch (e) {
+        _showCustomToast("Error: ${e.toString()}");
+      }
     }
   }
 
