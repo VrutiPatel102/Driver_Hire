@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart' as osm;
+import 'package:intl/intl.dart';
 
 class BookDriverScreen extends StatefulWidget {
   const BookDriverScreen({super.key});
@@ -26,10 +27,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
   TimeOfDay? selectedTime;
   String pickupAddress = '';
   String dropAddress = '';
-  double estimatedFare=200;
-
-
-
+  double estimatedFare = 200;
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +138,9 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
             return;
           }
           try {
+            String formattedDate = DateFormat(
+              'dd-MM-yyyy – hh:mm a',
+            ).format(DateTime.now());
             await firestore.FirebaseFirestore.instance
                 .collection('bookings')
                 .add({
@@ -149,7 +150,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                   'time': _getTimeText(),
                   'carType': selectedCarType,
                   'rideType': selectedTripType,
-                  'createdAt': firestore.FieldValue.serverTimestamp(),
+                  'saved_at': formattedDate,
                   'fare': 200,
                 });
 
