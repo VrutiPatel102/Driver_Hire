@@ -33,7 +33,7 @@ class BookingsScreen extends StatelessWidget {
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('bookings')
-              .orderBy('createdAt', descending: true)
+              .orderBy('saved_at', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
