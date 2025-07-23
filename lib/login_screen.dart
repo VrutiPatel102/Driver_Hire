@@ -3,6 +3,7 @@ import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class LoginScreen extends StatefulWidget {
   final String loginAs;
@@ -197,8 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
             try {
-              final userCredential = await FirebaseAuth.instance
-                  .signInWithEmailAndPassword(
+              final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
                 email: _emailController.text.trim(),
                 password: _passwordController.text.trim(),
               );
@@ -207,12 +207,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
               if (user != null) {
                 final String selectedRole = widget.loginAs;
-                final String correctCollection =
-                selectedRole == 'driver' ? 'drivers' : 'users';
+                final String correctCollection = selectedRole == 'driver' ? 'drivers' : 'users';
 
                 final DocumentSnapshot userDoc = await FirebaseFirestore.instance
                     .collection(correctCollection)
-                    .doc(user.uid)
+                    .doc(user.email!.trim())
                     .get();
 
                 if (!userDoc.exists) {
@@ -227,28 +226,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                   return;
                 }
+
+                final formattedLoginTime =
+                DateFormat('dd-MM-yyyy – hh:mm a').format(DateTime.now());
+
                 await FirebaseFirestore.instance
                     .collection(correctCollection)
-                    .doc(user.uid)
+                    .doc(_emailController.text.trim())
                     .set({
                   'email': user.email,
                   'uid': user.uid,
-                  'loginAt': FieldValue.serverTimestamp(),
+                  'loginAt': formattedLoginTime,
                 }, SetOptions(merge: true));
 
-                if (selectedRole == 'user') {
-                  Navigator.pushNamed(context, AppRoute.bottombar);
-                } else {
-                  Navigator.pushNamed(context, AppRoute.driverBottombar);
-                }
+                _showCustomToast("Login successful");
+
+                Navigator.pushNamed(
+                  context,
+                  selectedRole == 'user' ? AppRoute.bottombar : AppRoute.driverBottombar,
+                );
               }
             } on FirebaseAuthException catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(e.message ?? 'Login failed'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              _showCustomToast(e.message ?? 'Login failed');
             }
           }
         },
@@ -290,7 +289,29 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+  void _showCustomToast(String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 150,
+        left: MediaQuery.of(context).size.width * 0.5 - (message.length * 4.0),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AColor().grey300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(message, style: TextStyle(color: AColor().Black)),
+          ),
+        ),
+      ),
+    );
 
+    overlay.insert(overlayEntry);
+    Future.delayed(Duration(seconds: 2)).then((_) => overlayEntry.remove());
+  }
   AppBar _buildAppbar() {
     return AppBar(
       backgroundColor: AColor().White,
