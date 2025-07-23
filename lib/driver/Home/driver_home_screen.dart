@@ -1,36 +1,72 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
-class DriverHomeScreen extends StatelessWidget {
+class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({super.key});
 
-  final List<Map<String, String>> rideRequests = const [
-    {
-      'name': 'Prakruti Shah',
-      'date': '01/01/2025',
-      'time': '6.54 pm',
-      'pickup': '1 Sky Heven Avenue, Satellite',
-      'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '₹600',
-    },
-    {
-      'name': 'Prakruti Shah',
-      'date': '01/01/2025',
-      'time': '6.54 pm',
-      'pickup': '1 Sky Heven Avenue, Satellite',
-      'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '₹600',
-    },
-    {
-      'name': 'Prakruti Shah',
-      'date': '01/01/2025',
-      'time': '6.54 pm',
-      'pickup': '1 Sky Heven Avenue, Satellite',
-      'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '₹600',
-    },
-  ];
+  @override
+  State<DriverHomeScreen> createState() => _DriverHomeScreenState();
+}
+
+class _DriverHomeScreenState extends State<DriverHomeScreen> {
+  List<Map<String, dynamic>> rideRequests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRideRequests();
+  }
+  Future<void> fetchRideRequests() async {
+    try {
+      final bookingsSnapshot = await FirebaseFirestore.instance
+          .collection('bookings')
+          .get();
+
+      List<Map<String, dynamic>> fetchedRequests = [];
+
+      for (var bookingDoc in bookingsSnapshot.docs) {
+        final bookingData = bookingDoc.data();
+        final userEmail = bookingData['user_email'];
+
+        if (userEmail != null && userEmail.toString().isNotEmpty) {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userEmail)
+              .get();
+
+          if (userDoc.exists) {
+            final userData = userDoc.data()!;
+            final mergedData = {
+              ...bookingData,
+              'name': userData['name'] ?? 'Unknown',
+              'pickup': bookingData['pickupAddress'],
+              'dropoff': bookingData['dropAddress'],
+              'amount': bookingData['fare'].toString(),
+            };
+            fetchedRequests.add(mergedData);
+          } else {
+            fetchedRequests.add({
+              ...bookingData,
+              'name': 'Unknown',
+              'pickup': bookingData['pickupAddress'],
+              'dropoff': bookingData['dropAddress'],
+              'amount': bookingData['fare'].toString(),
+            });
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          rideRequests = fetchedRequests;
+        });
+      }
+    } catch (e) {
+      print("Error fetching ride requests: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +100,12 @@ class DriverHomeScreen extends StatelessWidget {
       separatorBuilder: (_, __) => SizedBox(height: 16),
       itemBuilder: (context, index) {
         final data = rideRequests[index];
-        return _buildRequestCard(data,context);
+        return _buildRequestCard(data, context);
       },
     );
   }
 
-  Widget _buildRequestCard(Map<String, String> data, BuildContext context) {
+  Widget _buildRequestCard(Map<String, dynamic> data, BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
@@ -91,9 +127,9 @@ class DriverHomeScreen extends StatelessWidget {
             SizedBox(height: 12),
             Divider(color: AColor().green.withAlpha(102)),
             SizedBox(height: 12),
-            _buildAddress(label: 'Pickup', address: data['pickup']!),
+            _buildAddress(label: 'Pickup', address: data['pickup'] ?? ''),
             SizedBox(height: 10),
-            _buildAddress(label: 'Dropoff', address: data['dropoff']!),
+            _buildAddress(label: 'Dropoff', address: data['dropoff'] ?? ''),
             SizedBox(height: 20),
             _buildAcceptButton(context),
           ],
@@ -102,8 +138,7 @@ class DriverHomeScreen extends StatelessWidget {
     );
   }
 
-
-  Widget _buildHeader(Map<String, String> data) {
+  Widget _buildHeader(Map<String, dynamic> data) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -112,24 +147,24 @@ class DriverHomeScreen extends StatelessWidget {
           children: [
             Text(
               data['name'] ?? '',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 4),
             Text(
-              '${data['date']}  -  ${data['time']}',
+              '${data['date'] ?? ''}  -  ${data['time'] ?? ''}',
               style: TextStyle(color: Colors.grey[700]),
             ),
           ],
         ),
-        Text(
-          data['amount'] ?? '',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          children: [
+            Text("₹",style: TextStyle(fontSize: 20),),
+            SizedBox(width: 5,),
+            Text(
+              data['amount'] ?? '',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ],
     );
@@ -139,20 +174,11 @@ class DriverHomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 14,
-          ),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[700], fontSize: 14)),
         SizedBox(height: 4),
         Text(
           address,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -172,10 +198,7 @@ class DriverHomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.pushNamed(context, AppRoute.driverRideDetailScreen);
         },
-        child: Text(
-          'Accept',
-          style: TextStyle(color: Colors.white),
-        ),
+        child: Text('Accept', style: TextStyle(color: Colors.white)),
       ),
     );
   }

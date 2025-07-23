@@ -3,6 +3,7 @@ import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart' as osm;
 import 'package:intl/intl.dart';
 
@@ -25,8 +26,6 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
 
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-  String pickupAddress = '';
-  String dropAddress = '';
   double estimatedFare = 200;
 
   @override
@@ -84,7 +83,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
           Row(
             children: [_pickupAddress(), SizedBox(width: 20), _dropAddress()],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Text(
             "Date & Time",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -99,7 +98,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                   _selectDate,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: _iconInputField(
                   Icons.access_time,
@@ -122,7 +121,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: AColor().Black,
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: EdgeInsets.symmetric(vertical: 20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -137,34 +136,51 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
             );
             return;
           }
+
           try {
-            String formattedDate = DateFormat(
-              'dd-MM-yyyy – hh:mm a',
-            ).format(DateTime.now());
-            await firestore.FirebaseFirestore.instance
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text("User not logged in")));
+              return;
+            }
+
+            final String formattedDate = DateFormat(
+              'dd-MM-yyyy',
+            ).format(selectedDate!);
+            final String formattedTime = _getTimeText();
+            final String userEmail = user.email!;
+            final timestamp = firestore.Timestamp.now();
+
+            final bookingData = {
+              'pickupAddress': pickUpController.text,
+              'dropAddress': reachController.text,
+              'date': formattedDate,
+              'time': formattedTime,
+              'carType': selectedCarType,
+              'rideType': selectedTripType,
+              'saved_at': timestamp,
+              'fare': estimatedFare,
+              'status': 'Pending',
+              'user_email': userEmail,
+            };
+
+            final bookingRef = await firestore.FirebaseFirestore.instance
                 .collection('bookings')
-                .add({
-                  'pickupAddress': pickUpController.text,
-                  'dropAddress': reachController.text,
-                  'date': _getDateText(),
-                  'time': _getTimeText(),
-                  'carType': selectedCarType,
-                  'rideType': selectedTripType,
-                  'saved_at': formattedDate,
-                  'fare': 200,
-                });
+                .add(bookingData);
+
+            await firestore.FirebaseFirestore.instance
+                .collection('users')
+                .doc(userEmail)
+                .collection('bookings')
+                .doc(bookingRef.id)
+                .set(bookingData);
 
             Navigator.pushNamed(
               context,
               AppRoute.waitingDriver,
-              arguments: {
-                'pickupAddress': pickUpController.text,
-                'dropAddress': reachController.text,
-                'date': _getDateText(),
-                'time': _getTimeText(),
-                'carType': selectedCarType,
-                'rideType': selectedTripType,
-              },
+              arguments: bookingData,
             );
           } catch (e) {
             ScaffoldMessenger.of(
@@ -172,7 +188,6 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
             ).showSnackBar(SnackBar(content: Text("Failed to book: $e")));
           }
         },
-
         child: Text(
           'Next',
           style: TextStyle(color: AColor().White, fontSize: 18),
@@ -250,7 +265,6 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
     );
   }
 
-  /// === Trip Type ===
   Widget _tripTypeButton(String type) {
     bool isSelected = selectedTripType == type;
     return Expanded(
@@ -261,7 +275,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
           });
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             color: isSelected ? AColor().Black : Colors.grey[200],
             borderRadius: BorderRadius.circular(12),
@@ -280,7 +294,6 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
     );
   }
 
-  /// === Car Type ===
   Widget _carTypeOption(String type, String iconPath) {
     bool isSelected = selectedCarType == type;
     return Column(
@@ -309,12 +322,11 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
     );
   }
 
-  /// === Date Picker ===
   Widget _iconInputField(IconData icon, String hint, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(12),
@@ -322,8 +334,8 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
         child: Row(
           children: [
             Icon(icon, size: 18),
-            const SizedBox(width: 8),
-            Expanded(child: Text(hint, style: const TextStyle(fontSize: 16))),
+            SizedBox(width: 8),
+            Expanded(child: Text(hint, style: TextStyle(fontSize: 16))),
           ],
         ),
       ),
@@ -343,12 +355,12 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
   }
 
   Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
-      builder: (BuildContext context, Widget? child) {
+      builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
@@ -364,27 +376,20 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
         );
       },
     );
-
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
+    if (picked != null) setState(() => selectedDate = picked);
   }
 
   Future<void> _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(
+    final picked = await showTimePicker(
       context: context,
       initialTime: selectedTime ?? TimeOfDay.now(),
-      builder: (BuildContext context, Widget? child) {
+      builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
               primary: AColor().green,
               onPrimary: Colors.white,
-              surface: Colors.white,
               onSurface: AColor().Black,
-              secondary: AColor().green,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(foregroundColor: AColor().green),
@@ -394,30 +399,17 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
         );
       },
     );
-
-    if (picked != null) {
-      setState(() {
-        selectedTime = picked;
-      });
-    }
+    if (picked != null) setState(() => selectedTime = picked);
   }
 
-  /// === AppBar ===
   AppBar _buildAppbar() {
     return AppBar(
       backgroundColor: AColor().White,
       elevation: 0,
       leading: IconButton(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        icon: const Icon(Icons.arrow_back_ios, size: 16),
-        padding: const EdgeInsets.only(
-          top: 13,
-          bottom: 13,
-          left: 16,
-          right: 12,
-        ),
+        onPressed: () => Navigator.pop(context),
+        icon: Icon(Icons.arrow_back_ios, size: 16),
+        padding: EdgeInsets.only(top: 13, bottom: 13, left: 16, right: 12),
         style: IconButton.styleFrom(
           backgroundColor: AColor().green,
           shape: RoundedRectangleBorder(
