@@ -3,6 +3,8 @@ import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -160,6 +162,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _usernameField() {
+
     return TextFormField(
       controller: _nameController,
       decoration: _inputDecoration('User name'),
@@ -265,18 +268,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
               if (user != null) {
                 final collectionName = _selectedRole == 'driver' ? 'drivers' : 'users';
 
+                final formattedDate = DateFormat('dd-MM-yyyy – hh:mm a').format(DateTime.now());
+
                 await FirebaseFirestore.instance
                     .collection(collectionName)
-                    .doc(user.uid)
+                    .doc(_emailController.text.trim()) // use email as doc ID
                     .set({
                   'uid': user.uid,
                   'name': _nameController.text.trim(),
                   'email': _emailController.text.trim(),
-                  'createdAt': FieldValue.serverTimestamp(),
+                  'createdAt': formattedDate, // formatted date
                   'role': _selectedRole,
                 });
 
-                print("Registered as $_selectedRole, saved in collection: $collectionName");
+                _showCustomToast("Registered successfully");
 
                 Navigator.pushNamed(context, AppRoute.chooseScreen);
               }
@@ -291,17 +296,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 message = 'Invalid email address.';
               }
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message), backgroundColor: Colors.red),
-              );
+              _showCustomToast(message);
             } catch (e) {
               print('Registration Error: $e');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Something went wrong: ${e.toString()}'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              _showCustomToast('Something went wrong: ${e.toString()}');
             }
           }
         },
@@ -312,6 +310,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
+
 
   Widget _loginLink() {
     return Center(
@@ -356,5 +355,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       suffixIcon: suffix,
     );
+  }
+
+  void _showCustomToast(String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 150,
+        left: MediaQuery.of(context).size.width * 0.5 - (message.length * 4.0),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AColor().grey300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(message, style: TextStyle(color: AColor().Black)),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+    Future.delayed(Duration(seconds: 2)).then((_) => overlayEntry.remove());
   }
 }

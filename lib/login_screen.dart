@@ -3,6 +3,7 @@ import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class LoginScreen extends StatefulWidget {
   final String loginAs;
@@ -194,7 +195,6 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
             try {
@@ -213,17 +213,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     ? 'drivers'
                     : 'users';
 
+                final formattedLoginTime = DateFormat(
+                  'dd-MM-yyyy – hh:mm a',
+                ).format(DateTime.now());
+
                 print('Logged in UID: ${user.uid}');
                 print('Saving login timestamp in collection: $collection');
 
                 await FirebaseFirestore.instance
                     .collection(collection)
-                    .doc(user.uid)
+                    .doc(_emailController.text.trim())
                     .set({
                       'email': user.email,
                       'uid': user.uid,
-                      'loginAt': FieldValue.serverTimestamp(),
+                      'loginAt': formattedLoginTime,
                     }, SetOptions(merge: true));
+
+                _showCustomToast("Login successful");
 
                 print(
                   '➡️ Navigating to: ${widget.loginAs == 'user' ? 'User BottomBar' : 'Driver BottomBar'}',
@@ -237,18 +243,10 @@ class _LoginScreenState extends State<LoginScreen> {
               }
             } on FirebaseAuthException catch (e) {
               print('❌ FirebaseAuthException: ${e.code} - ${e.message}');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(e.message ?? 'Login failed'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              _showCustomToast(e.message ?? 'Login failed');
             }
           }
         },
-        // onPressed: () {
-        //   Navigator.pushNamed(context, AppRoute.bottombar);
-        // },
         child: Text(
           'Login',
           style: TextStyle(color: AColor().White, fontSize: 18),
@@ -306,5 +304,29 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void _showCustomToast(String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 150,
+        left: MediaQuery.of(context).size.width * 0.5 - (message.length * 4.0),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AColor().grey300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(message, style: TextStyle(color: AColor().Black)),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+    Future.delayed(Duration(seconds: 2)).then((_) => overlayEntry.remove());
   }
 }
