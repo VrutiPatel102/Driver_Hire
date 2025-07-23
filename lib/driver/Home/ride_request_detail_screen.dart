@@ -1,15 +1,48 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
-class RideRequestDetailScreen extends StatelessWidget {
+class RideRequestDetailScreen extends StatefulWidget {
   const RideRequestDetailScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final Map<String, String> data =
-    ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+  State<RideRequestDetailScreen> createState() =>
+      _RideRequestDetailScreenState();
+}
 
+class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
+  String userName = '';
+  Map<String, String> data = {};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)!.settings.arguments;
+    if (args is Map<String, dynamic>) {
+      data = args.map((key, value) => MapEntry(key, value.toString()));
+      fetchUserName(data['user_email'] ?? '');
+    }
+  }
+
+  Future<void> fetchUserName(String userId) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      if (doc.exists) {
+        setState(() {
+          userName = doc['name'] ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching user: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AColor().White,
       appBar: _buildAppBar(context),
@@ -73,19 +106,16 @@ class RideRequestDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              data['name'] ?? '',
-              style:  TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              userName.isNotEmpty ? userName : 'Loading...',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-             SizedBox(height: 4),
+            SizedBox(height: 4),
             Text('${data['date']}  -  ${data['time']}'),
           ],
         ),
         Text(
           ' ${data['amount']}',
-          style:  TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ],
     );
@@ -96,8 +126,8 @@ class RideRequestDetailScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(color: Colors.grey[700])),
-         SizedBox(height: 4),
-        Text(value, style:  TextStyle(fontWeight: FontWeight.w500)),
+        SizedBox(height: 4),
+        Text(value, style: TextStyle(fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -108,13 +138,20 @@ class RideRequestDetailScreen extends StatelessWidget {
       children: [
         const Divider(),
         const Text("Car Type"),
-        const Text("SUV", style: TextStyle(fontWeight: FontWeight.w600)),
+        Text(
+          data['carType'] ?? 'N/A',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 8),
         const Text("Trip Type"),
-        const Text("One-Way Trip", style: TextStyle(fontWeight: FontWeight.w600)),
+        Text(
+          data['rideType'] ?? 'N/A',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
       ],
     );
   }
+
 
   Widget _buildPaymentDetails() {
     return Column(
@@ -125,24 +162,21 @@ class RideRequestDetailScreen extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text("Ride Fare"),
-            Text("₹ 590.00"),
-          ],
+          children: const [Text("Ride Fare"), Text("₹ 590.00")],
         ),
         const SizedBox(height: 6),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text("Tax Fare"),
-            Text("₹ 10.00"),
-          ],
+          children: const [Text("Tax Fare"), Text("₹ 10.00")],
         ),
         const Divider(height: 30),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: const [
-            Text("Total Estimate", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              "Total Estimate",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             Text("₹ 600 .00", style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
@@ -157,12 +191,17 @@ class RideRequestDetailScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AColor().Black,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
         onPressed: () {
           Navigator.pushNamed(context, AppRoute.driverRideDetailScreen);
         },
-        child: const Text("Go To Pickup", style: TextStyle(color: Colors.white)),
+        child: const Text(
+          "Go To Pickup",
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
