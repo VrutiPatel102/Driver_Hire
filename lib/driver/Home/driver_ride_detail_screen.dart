@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:driver_hire/color.dart';
 import 'package:driver_hire/driver/driver_bottom_bar.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +17,16 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
   final MapController _mapController = MapController();
   double _currentZoom = 13.0;
 
-  final LatLng startPoint = LatLng(23.0225, 72.5714); // Ahmedabad
-  final LatLng endPoint = LatLng(23.0325, 72.5800); // Nearby
+  late Map<String, dynamic> rideData;
+
+  final LatLng startPoint = LatLng(23.0225, 72.5714);
+  final LatLng endPoint = LatLng(23.0325, 72.5800);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    rideData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+  }
 
   void _zoomIn() {
     setState(() {
@@ -32,6 +42,37 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
     });
   }
 
+  Future<void> _cancelRide() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Driver not logged in")));
+        return;
+      }
+
+      final rideId = rideData['rideId'];
+      if (rideId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Missing ride ID")));
+        return;
+      }
+
+      await FirebaseFirestore.instance.collection('bookings').doc(rideId).update({
+        'status': 'cancelled',
+        'driverId': currentUser.uid,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Ride cancelled")));
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => DriverBottomBarScreen(initialIndex: 0)),
+            (route) => false,
+      );
+    } catch (e) {
+      print("Error cancelling ride: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to cancel ride")));
+    }
+  }
 
 
   @override
@@ -41,7 +82,14 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
         title: const Text('Ride Details'),
         backgroundColor: Colors.white,
       ),
-      body: Column(children: [_map(), _detailBox(), Spacer(), _cancelBtn()]),
+      body: Column(
+        children: [
+          _map(),
+          _detailBox(),
+          Spacer(),
+          _cancelBtn(), // Changed from cancel to accept
+        ],
+      ),
     );
   }
 
@@ -69,21 +117,13 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
                     point: startPoint,
                     width: 40,
                     height: 40,
-                    child: Icon(
-                      Icons.location_on,
-                      color: AColor().green,
-                      size: 40,
-                    ),
+                    child: Icon(Icons.location_on, color: AColor().green, size: 40),
                   ),
                   Marker(
                     point: endPoint,
                     width: 40,
                     height: 40,
-                    child: Icon(
-                      Icons.location_on,
-                      color: AColor().Red,
-                      size: 40,
-                    ),
+                    child: Icon(Icons.location_on, color: AColor().Red, size: 40),
                   ),
                 ],
               ),
@@ -106,24 +146,23 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            _DetailText(label: "Pickup Address:", value: "123 Main Street, Ahmedabad"),
+          children: [
+            _DetailText(label: "Pickup Address:", value: rideData['pickup'] ?? 'N/A'),
             SizedBox(height: 15),
-            _DetailText(label: "Date:", value: "17 July 2025"),
+            _DetailText(label: "Date:", value: rideData['date'] ?? 'N/A'),
             SizedBox(height: 15),
-            _DetailText(label: "Time:", value: "10:00 AM"),
+            _DetailText(label: "Time:", value: rideData['time'] ?? 'N/A'),
             SizedBox(height: 15),
-            _DetailText(label: "Car Type:", value: "Sedan"),
+            _DetailText(label: "Car Type:", value: rideData['carType'] ?? 'N/A'),
             SizedBox(height: 15),
-            _DetailText(label: "Ride Type:", value: "One Way"),
+            _DetailText(label: "Ride Type:", value: rideData['rideType'] ?? 'N/A'),
             SizedBox(height: 15),
-            _DetailText(label: "Estimate:", value: "₹250"),
+            _DetailText(label: "Estimate:", value: "₹${rideData['amount'] ?? '0'}"),
           ],
         ),
       ),
     );
   }
-
 
   Widget _zoomBtn() {
     return Positioned(
@@ -163,23 +202,13 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    DriverBottomBarScreen(initialIndex: 0), // Home tab
-              ),
-              (route) => false,
-            );
-          },
+          onPressed: _cancelRide,
           child: Text('Cancel Ride', style: TextStyle(color: AColor().White)),
         ),
       ),
     );
   }
 }
-
 
 class _DetailText extends StatelessWidget {
   final String label;
@@ -191,21 +220,13 @@ class _DetailText extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: TextStyle(
-          fontSize: 15,
-          color: Colors.black,
-        ),
+        style: TextStyle(fontSize: 15, color: Colors.black),
         children: [
           TextSpan(
             text: "$label ",
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
           ),
-          TextSpan(
-            text: value,
-          ),
+          TextSpan(text: value),
         ],
       ),
     );

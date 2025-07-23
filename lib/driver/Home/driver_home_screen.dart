@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
@@ -28,6 +29,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
       for (var bookingDoc in bookingsSnapshot.docs) {
         final bookingData = bookingDoc.data();
+        bookingData['rideId'] = bookingDoc.id;
         final userEmail = bookingData['user_email'];
 
         if (userEmail != null && userEmail.toString().isNotEmpty) {
@@ -131,7 +133,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             SizedBox(height: 10),
             _buildAddress(label: 'Dropoff', address: data['dropoff'] ?? ''),
             SizedBox(height: 20),
-            _buildAcceptButton(context),
+            _buildAcceptButton(context,data)
+
           ],
         ),
       ),
@@ -184,7 +187,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-  Widget _buildAcceptButton(BuildContext context) {
+  Widget _buildAcceptButton(BuildContext context, Map<String, dynamic> rideData) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -195,11 +198,41 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoute.driverRideDetailScreen);
+        onPressed: () async {
+          try {
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Driver not logged in")),
+              );
+              return;
+            }
+
+            final rideId = rideData['rideId']; // must be passed while navigating
+            await FirebaseFirestore.instance.collection('bookings').doc(rideId).update({
+              'status': 'accepted',
+              'driverId': currentUser.uid,
+            });
+
+            // Show confirmation
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Ride accepted")),
+            );
+            Navigator.pushNamed(
+              context,
+              AppRoute.driverRideDetailScreen,
+              arguments: rideData,
+            );
+          } catch (e) {
+            print("Error accepting ride: $e");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to accept ride")),
+            );
+          }
         },
         child: Text('Accept', style: TextStyle(color: Colors.white)),
       ),
     );
   }
+
 }
