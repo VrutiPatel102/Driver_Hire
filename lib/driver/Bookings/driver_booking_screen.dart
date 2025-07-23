@@ -1,38 +1,58 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
 class DriverBookingScreen extends StatelessWidget {
   const DriverBookingScreen({super.key});
 
-  final List<Map<String, String>> bookings = const [
-    {
-      'driverName': 'John Doe',
-      'date': '12 July 2025',
-      'time': '10:00 AM',
-      'carType': 'Sedan',
-      'rideType': 'One Way',
-      'status': 'Pending',
-      'amount': '₹ 500.00',
-    },
-    {
-      'driverName': 'Jane Smith',
-      'date': '10 July 2025',
-      'time': '2:00 PM',
-      'carType': 'SUV',
-      'rideType': 'Round Trip',
-      'status': 'Completed',
-      'amount': '₹ 1200.00',
-    },
-    {
-      'driverName': 'Alex Johnson',
-      'date': '8 July 2025',
-      'time': '5:30 PM',
-      'carType': 'EV',
-      'rideType': 'One Way',
-      'status': 'Cancelled',
-      'amount': '₹ 0.00',
-    },
-  ];
+  Future<List<Map<String, dynamic>>> _fetchBookingsWithUserNames() async {
+    final bookingsSnapshot = await FirebaseFirestore.instance
+        .collection('bookings')
+        .orderBy('date', descending: true)
+        .get();
+
+    List<Map<String, dynamic>> bookingsWithNames = [];
+
+    for (var doc in bookingsSnapshot.docs) {
+      final bookingData = doc.data();
+      final userEmail = bookingData['user_email'];
+
+      String userName = 'Unknown';
+
+      if (userEmail != null && userEmail is String) {
+        final trimmedEmail = userEmail.trim();
+
+        try {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(trimmedEmail)
+              .get();
+
+          if (userDoc.exists && userDoc.data()!.containsKey('name')) {
+            userName = userDoc.data()!['name'];
+          } else {
+            print("User not found for email: $trimmedEmail");
+          }
+        } catch (e) {
+          print('Error fetching user $trimmedEmail: $e');
+        }
+      }
+
+      bookingsWithNames.add({
+        'userName': userName,
+        'date': bookingData['date'] ?? '',
+        'time': bookingData['time'] ?? '',
+        'carType': bookingData['carType'] ?? '',
+        'rideType': bookingData['rideType'] ?? '',
+        'status': bookingData['status'] ?? '',
+        'amount': bookingData.containsKey('fare') && bookingData['fare'] != null
+            ? bookingData['fare'].toString()
+            : '0',
+      });
+    }
+
+    return bookingsWithNames;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,19 +79,38 @@ class DriverBookingScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: ListView.separated(
-          itemCount: bookings.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 20),
-          itemBuilder: (context, index) {
-            final booking = bookings[index];
-            return _buildBookingCard(
-              driverName: booking['driverName']!,
-              date: booking['date']!,
-              time: booking['time']!,
-              carType: booking['carType']!,
-              rideType: booking['rideType']!,
-              status: booking['status']!,
-              amount: booking['amount']!,
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: _fetchBookingsWithUserNames(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
+
+            final bookings = snapshot.data ?? [];
+
+            if (bookings.isEmpty) {
+              return const Center(child: Text('No bookings found.'));
+            }
+
+            return ListView.separated(
+              itemCount: bookings.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 20),
+              itemBuilder: (context, index) {
+                final booking = bookings[index];
+                return _buildBookingCard(
+                  userName: booking['userName'],
+                  date: booking['date'],
+                  time: booking['time'],
+                  carType: booking['carType'],
+                  rideType: booking['rideType'],
+                  status: booking['status'],
+                  amount: booking['amount'],
+                );
+              },
             );
           },
         ),
@@ -80,7 +119,7 @@ class DriverBookingScreen extends StatelessWidget {
   }
 
   Widget _buildBookingCard({
-    required String driverName,
+    required String userName,
     required String date,
     required String time,
     required String carType,
@@ -98,13 +137,13 @@ class DriverBookingScreen extends StatelessWidget {
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 2,
             blurRadius: 10,
-          )
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Driver Name: $driverName'),
+          Text('User Name: $userName'),
           const SizedBox(height: 8),
           Text('Date: $date'),
           const SizedBox(height: 8),
@@ -117,17 +156,10 @@ class DriverBookingScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text(status, style: const TextStyle(fontWeight: FontWeight.bold)),
               Text(
-                status,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                amount,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                ' ₹$amount',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),

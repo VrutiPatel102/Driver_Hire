@@ -1,9 +1,58 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:driver_hire/color.dart';
 import 'package:flutter/material.dart';
+import 'package:driver_hire/color.dart';
 
 class BookingsScreen extends StatelessWidget {
   const BookingsScreen({super.key});
+
+  Future<List<Map<String, dynamic>>> _fetchBookingsWithUserNames() async {
+    final bookingsSnapshot = await FirebaseFirestore.instance
+        .collection('bookings')
+        .orderBy('date', descending: true)
+        .get();
+
+    List<Map<String, dynamic>> bookingsWithNames = [];
+
+    for (var doc in bookingsSnapshot.docs) {
+      final bookingData = doc.data();
+      final driverEmail = bookingData['user_email'];
+
+      String driverName = 'Unknown';
+
+      if (driverEmail != null && driverEmail is String) {
+        final trimmedEmail = driverEmail.trim();
+
+        try {
+          final driverDoc = await FirebaseFirestore.instance
+              .collection('drivers')
+              .doc(trimmedEmail)
+              .get();
+
+          if (driverDoc.exists && driverDoc.data()!.containsKey('name')) {
+            driverName = driverDoc.data()!['name'];
+          } else {
+            print("Driver not found for email: $trimmedEmail");
+          }
+        } catch (e) {
+          print('Error fetching driver $trimmedEmail: $e');
+        }
+      }
+
+      bookingsWithNames.add({
+        'driverName': driverName,
+        'date': bookingData['date'] ?? '',
+        'time': bookingData['time'] ?? '',
+        'carType': bookingData['carType'] ?? '',
+        'rideType': bookingData['rideType'] ?? '',
+        'status': bookingData['status'] ?? '',
+        'amount': bookingData.containsKey('fare') && bookingData['fare'] != null
+            ? bookingData['fare'].toString()
+            : '0',
+      });
+    }
+
+    return bookingsWithNames;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,36 +79,36 @@ class BookingsScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('bookings')
-              .orderBy('saved_at', descending: true)
-              .snapshots(),
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: _fetchBookingsWithUserNames(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('No bookings found'));
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
             }
 
-            final bookings = snapshot.data!.docs;
+            final bookings = snapshot.data ?? [];
+
+            if (bookings.isEmpty) {
+              return const Center(child: Text('No bookings found.'));
+            }
 
             return ListView.separated(
               itemCount: bookings.length,
               separatorBuilder: (_, __) => const SizedBox(height: 20),
               itemBuilder: (context, index) {
-                final data = bookings[index].data() as Map<String, dynamic>;
-
+                final booking = bookings[index];
                 return _buildBookingCard(
-                  driverName: data['driverName'] ?? 'N/A',
-                  date: data['date'] ?? 'N/A',
-                  time: data['time'] ?? 'N/A',
-                  carType: data['carType'] ?? 'N/A',
-                  rideType: data['rideType'] ?? 'N/A',
-                  status: data['status'] ?? 'Completed',
-                  amount: '₹ ${double.tryParse(data['fare'].toString())?.toStringAsFixed(2) ?? '0.00'}',
+                  driverName: booking['driverName'],
+                  date: booking['date'],
+                  time: booking['time'],
+                  carType: booking['carType'],
+                  rideType: booking['rideType'],
+                  status: booking['status'],
+                  amount: booking['amount'],
                 );
               },
             );
@@ -88,7 +137,7 @@ class BookingsScreen extends StatelessWidget {
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 2,
             blurRadius: 10,
-          )
+          ),
         ],
       ),
       child: Column(
@@ -107,12 +156,9 @@ class BookingsScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text(status, style: const TextStyle(fontWeight: FontWeight.bold)),
               Text(
-                status,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                amount,
+                ' ₹$amount',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
