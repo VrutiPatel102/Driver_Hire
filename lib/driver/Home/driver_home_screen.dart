@@ -28,9 +28,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         .collection('bookings')
         .snapshots()
         .listen((snapshot) async {
-      List<Map<String, dynamic>> updatedRequests = [];
+      final List<Map<String, dynamic>> updatedRequests = [];
 
-      for (var doc in snapshot.docs) {
+      // Collect all futures to fetch user names in parallel
+      List<Future<void>> futures = snapshot.docs.map((doc) async {
         final bookingData = doc.data();
         bookingData['rideId'] = doc.id;
 
@@ -38,12 +39,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         String userName = 'Unknown';
 
         if (userEmail != null && userEmail.toString().isNotEmpty) {
-          final userDoc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userEmail)
-              .get();
-          if (userDoc.exists) {
-            userName = userDoc['name'] ?? 'Unknown';
+          try {
+            final userDoc = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userEmail)
+                .get();
+            if (userDoc.exists) {
+              userName = userDoc['name'] ?? 'Unknown';
+            }
+          } catch (e) {
+            print("Error fetching user for $userEmail: $e");
           }
         }
 
@@ -54,7 +59,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           'dropoff': bookingData['dropAddress'],
           'amount': bookingData['fare'].toString(),
         });
-      }
+      }).toList();
+
+      await Future.wait(futures); // Wait for all user data to load in parallel
 
       if (mounted) {
         setState(() {
@@ -188,9 +195,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   }
 
   Widget _buildAcceptButton(
-    BuildContext context,
-    Map<String, dynamic> rideData,
-  ) {
+      BuildContext context,
+      Map<String, dynamic> rideData,
+      ) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -210,18 +217,39 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             }
 
             final rideId = rideData['rideId'];
+            final updatedRideData = {
+              ...rideData,
+              'driverId': currentUser.uid,
+            };
+
+            // 🔄 Update ride status & driver assignment
             await FirebaseFirestore.instance
                 .collection('bookings')
                 .doc(rideId)
-                .update({'status': 'accepted', 'driverId': currentUser.uid});
+                .update({
+              'status': 'accepted',
+              'driverId': currentUser.uid,
+            });
 
             _showCustomToast(context, "Ride accepted");
 
+            // ✅ Navigate to DriverRideDetailScreen
             Navigator.pushNamed(
               context,
               AppRoute.driverRideDetailScreen,
-              arguments: rideData,
+              arguments: {
+                'pickupAddress': rideData['pickup'] ?? '',
+                'dropAddress': rideData['dropoff'] ?? '',
+                'date': rideData['date'] ?? '',
+                'time': rideData['time'] ?? '',
+                'carType': rideData['car_type'] ?? '',
+                'rideType': rideData['trip_type'] ?? '',
+                'rideId': rideId,
+                'userEmail': rideData['user_email'] ?? '',
+              },
             );
+
+            // 🧠 Optionally, notify the user via Firestore trigger or FCM (not required here)
           } catch (e) {
             print("Error accepting ride: $e");
             _showCustomToast(context, "Failed to accept ride");
