@@ -3,7 +3,6 @@ import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class LoginScreen extends StatefulWidget {
   final String loginAs;
@@ -215,12 +214,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     .collection(correctCollection)
                     .doc(user.uid)
                     .get();
-                final formattedLoginTime = DateFormat(
-                  'dd-MM-yyyy – hh:mm a',
-                ).format(DateTime.now());
-
-                print('Logged in UID: ${user.uid}');
-                print('Saving login timestamp in collection: $collection');
 
                 if (!userDoc.exists) {
                   await FirebaseAuth.instance.signOut();
@@ -237,27 +230,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // ✅ Update login time
                 await FirebaseFirestore.instance
-                    .collection(collection)
-                    .doc(_emailController.text.trim())
                     .collection(correctCollection)
                     .doc(user.uid)
                     .set({
-                      'email': user.email,
-                      'uid': user.uid,
-                      'loginAt': formattedLoginTime,
-                    }, SetOptions(merge: true));
                   'email': user.email,
                   'uid': user.uid,
                   'loginAt': FieldValue.serverTimestamp(),
                 }, SetOptions(merge: true));
 
-                _showCustomToast("Login successful");
-
-                print(
-                  '➡️ Navigating to: ${widget.loginAs == 'user' ? 'User BottomBar' : 'Driver BottomBar'}',
-                );
-
-                if (widget.loginAs == 'user') {
                 if (selectedRole == 'user') {
                   Navigator.pushNamed(context, AppRoute.bottombar);
                 } else {
@@ -331,29 +311,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  void _showCustomToast(String message) {
-    final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        bottom: 150,
-        left: MediaQuery.of(context).size.width * 0.5 - (message.length * 4.0),
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: AColor().grey300,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(message, style: TextStyle(color: AColor().Black)),
-          ),
-        ),
-      ),
-    );
-
-    overlay.insert(overlayEntry);
-    Future.delayed(Duration(seconds: 2)).then((_) => overlayEntry.remove());
   }
 }
