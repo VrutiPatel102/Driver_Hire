@@ -272,7 +272,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 await FirebaseFirestore.instance
                     .collection(collectionName)
-                    .doc(_emailController.text.trim()) // use email as doc ID
+                    .doc(_emailController.text.trim())
                     .set({
                   'uid': user.uid,
                   'name': _nameController.text.trim(),
