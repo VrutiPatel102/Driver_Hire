@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
@@ -19,60 +18,55 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     super.initState();
     fetchRideRequests();
   }
-
   Future<void> fetchRideRequests() async {
-    final bookingSnapshot = await FirebaseFirestore.instance
-        .collection('bookings')
-        .get();
-
-    List<Map<String, dynamic>> mergedData = [];
-
-    for (var doc in bookingSnapshot.docs) {
-      final bookingData = doc.data();
-      final bookingUid = bookingData['uid'];
-
-      if (bookingUid == null || bookingUid.isEmpty) {
-        continue; // skip if no UID in booking
-      }
-
-      // Find user who matches the UID in 'users' collection
-      final userQuery = await FirebaseFirestore.instance
-          .collection('users')
-          .where('uid', isEqualTo: bookingUid)
-          .limit(1)
+    try {
+      final bookingsSnapshot = await FirebaseFirestore.instance
+          .collection('bookings')
           .get();
 
-      if (userQuery.docs.isEmpty) {
-        print("No user found for UID: $bookingUid");
-        continue;
+      List<Map<String, dynamic>> fetchedRequests = [];
+
+      for (var bookingDoc in bookingsSnapshot.docs) {
+        final bookingData = bookingDoc.data();
+        final userEmail = bookingData['user_email'];
+
+        if (userEmail != null && userEmail.toString().isNotEmpty) {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userEmail)
+              .get();
+
+          if (userDoc.exists) {
+            final userData = userDoc.data()!;
+            final mergedData = {
+              ...bookingData,
+              'name': userData['name'] ?? 'Unknown',
+              'pickup': bookingData['pickupAddress'],
+              'dropoff': bookingData['dropAddress'],
+              'amount': bookingData['fare'].toString(),
+            };
+            fetchedRequests.add(mergedData);
+          } else {
+            fetchedRequests.add({
+              ...bookingData,
+              'name': 'Unknown',
+              'pickup': bookingData['pickupAddress'],
+              'dropoff': bookingData['dropAddress'],
+              'amount': bookingData['fare'].toString(),
+            });
+          }
+        }
       }
 
-      final userData = userQuery.docs.first.data();
-      final userName = userData['name'] ?? 'User';
-
-      print("Booking UID: $bookingUid, User: $userName");
-
-      // Combine booking + user data
-      mergedData.add({
-        'name': userName,
-        'pickup': bookingData['pickup'] ?? '',
-        'dropoff': bookingData['drop'] ?? '',
-        'date': bookingData['date'] ?? '',
-        'time': bookingData['time'] ?? '',
-        'amount': bookingData['amount']?.toString() ?? '',
-      });
+      if (mounted) {
+        setState(() {
+          rideRequests = fetchedRequests;
+        });
+      }
+    } catch (e) {
+      print("Error fetching ride requests: $e");
     }
-
-    setState(() {
-      rideRequests = mergedData;
-    });
-
-    print("Total ride requests: ${rideRequests.length}");
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -153,10 +147,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           children: [
             Text(
               data['name'] ?? '',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 4),
             Text(
@@ -165,12 +156,15 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             ),
           ],
         ),
-        Text(
-          data['amount'] ?? '',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          children: [
+            Text("₹",style: TextStyle(fontSize: 20),),
+            SizedBox(width: 5,),
+            Text(
+              data['amount'] ?? '',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ],
     );
@@ -180,20 +174,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 14,
-          ),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[700], fontSize: 14)),
         SizedBox(height: 4),
         Text(
           address,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -213,10 +198,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         onPressed: () {
           Navigator.pushNamed(context, AppRoute.driverRideDetailScreen);
         },
-        child: Text(
-          'Accept',
-          style: TextStyle(color: Colors.white),
-        ),
+        child: Text('Accept', style: TextStyle(color: Colors.white)),
       ),
     );
   }
