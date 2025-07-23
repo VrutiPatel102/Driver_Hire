@@ -22,7 +22,6 @@ class UserRideDetailScreen extends StatefulWidget {
     required this.rideType,
   }) : super(key: key);
 
-
   @override
   State<UserRideDetailScreen> createState() => _UserRideDetailScreenState();
 }
@@ -48,15 +47,6 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
     });
   }
 
-  late Map<String, dynamic> bookingDetails;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    bookingDetails = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +55,17 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
         title: const Text('Ride Details'),
         backgroundColor: AColor().White,
       ),
-      body: Column(children: [_map(), _detailBox(), Spacer(), _cancelBtn()]),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _map(),
+            _detailBox(),
+            const SizedBox(height: 24),
+            _cancelBtn(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -132,19 +132,18 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _DetailText(label: "Pickup Address:", value: bookingDetails['pickupAddress'] ?? ''),
-            _DetailText(label: "Drop Address:", value: bookingDetails['dropAddress'] ?? ''),
-            _DetailText(label: "Date:", value: bookingDetails['date'] ?? ''),
-            _DetailText(label: "Time:", value: bookingDetails['time'] ?? ''),
-            _DetailText(label: "Car Type:", value: bookingDetails['carType'] ?? ''),
-            _DetailText(label: "Ride Type:", value: bookingDetails['rideType'] ?? ''),
+            _DetailText(label: "Pickup Address:", value: widget.pickupAddress),
+            _DetailText(label: "Drop Address:", value: widget.dropAddress),
+            _DetailText(label: "Date:", value: widget.date),
+            _DetailText(label: "Time:", value: widget.time),
+            _DetailText(label: "Car Type:", value: widget.carType),
+            _DetailText(label: "Ride Type:", value: widget.rideType),
             _DetailText(label: "Estimate:", value: "₹250"),
           ],
         ),
       ),
     );
   }
-
 
   Widget _ZoomBtn() {
     return Positioned(
@@ -190,7 +189,7 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
               MaterialPageRoute(
                 builder: (_) => BottomBarScreen(initialIndex: 0), // Home tab
               ),
-              (route) => false,
+                  (route) => false,
             );
           },
           child: Text('Cancel Ride', style: TextStyle(color: AColor().White)),
@@ -208,16 +207,19 @@ class _DetailText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
-      text: TextSpan(
-        style: TextStyle(fontSize: 15, color: Colors.black),
-        children: [
-          TextSpan(
-            text: "$label ",
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-          ),
-          TextSpan(text: value),
-        ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          style: TextStyle(fontSize: 15, color: Colors.black),
+          children: [
+            TextSpan(
+              text: "$label ",
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
       ),
     );
   }

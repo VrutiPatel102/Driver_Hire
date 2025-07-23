@@ -110,13 +110,16 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
         title: const Text('Ride Details'),
         backgroundColor: AColor().White,
       ),
-      body: Column(
-        children: [
-          _map(),
-          _detailBox(),
-          Spacer(),
-          _cancelBtn(),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _map(),
+            _detailBox(),
+            const SizedBox(height: 24),
+            _cancelBtn(),
+          ],
+        ),
       ),
     );
   }
