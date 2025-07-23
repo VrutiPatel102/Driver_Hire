@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,76 +12,61 @@ class DriverHomeScreen extends StatefulWidget {
 }
 
 class _DriverHomeScreenState extends State<DriverHomeScreen> {
-  List<Map<String, dynamic>> rideRequests = [];
-  StreamSubscription<QuerySnapshot>? _bookingSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    listenToRideRequests();
-  }
-
-  void listenToRideRequests() {
-    _bookingSubscription = FirebaseFirestore.instance
-        .collection('bookings')
-        .snapshots()
-        .listen((snapshot) async {
-      final List<Map<String, dynamic>> updatedRequests = [];
-
-      // Collect all futures to fetch user names in parallel
-      List<Future<void>> futures = snapshot.docs.map((doc) async {
-        final bookingData = doc.data();
-        bookingData['rideId'] = doc.id;
-
-        final userEmail = bookingData['user_email'];
-        String userName = 'Unknown';
-
-        if (userEmail != null && userEmail.toString().isNotEmpty) {
-          try {
-            final userDoc = await FirebaseFirestore.instance
-                .collection('users')
-                .doc(userEmail)
-                .get();
-            if (userDoc.exists) {
-              userName = userDoc['name'] ?? 'Unknown';
-            }
-          } catch (e) {
-            print("Error fetching user for $userEmail: $e");
-          }
-        }
-
-        updatedRequests.add({
-          ...bookingData,
-          'name': userName,
-          'pickup': bookingData['pickupAddress'],
-          'dropoff': bookingData['dropAddress'],
-          'amount': bookingData['fare'].toString(),
-        });
-      }).toList();
-
-      await Future.wait(futures); // Wait for all user data to load in parallel
-
-      if (mounted) {
-        setState(() {
-          rideRequests = updatedRequests;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _bookingSubscription?.cancel();
-    super.dispose();
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AColor().White,
       appBar: _buildAppBar(),
-      body: _buildBody(),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('bookings')
+            .where('status', isEqualTo: 'pending')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return const Center(child: Text("No pending rides"));
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.all(20),
+            itemCount: docs.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            itemBuilder: (context, index) {
+              final doc = docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+              final rideId = doc.id;
+              final userEmail = data['user_email'];
+
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userEmail)
+                    .get(),
+                builder: (context, userSnapshot) {
+                  final userName = userSnapshot.data?.get('name') ?? 'Unknown';
+
+                  final rideData = {
+                    ...data,
+                    'name': userName,
+                    'rideId': rideId,
+                    'pickup': data['pickupAddress'] ?? '',
+                    'dropoff': data['dropAddress'] ?? '',
+                    'amount': data['fare']?.toString() ?? '',
+                  };
+
+                  return _buildRequestCard(rideData, context);
+                },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -100,18 +83,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           color: AColor().Black,
         ),
       ),
-    );
-  }
-
-  Widget _buildBody() {
-    return ListView.separated(
-      padding: const EdgeInsets.all(20),
-      itemCount: rideRequests.length,
-      separatorBuilder: (_, __) => SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        final data = rideRequests[index];
-        return _buildRequestCard(data, context);
-      },
     );
   }
 
@@ -134,13 +105,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(data),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Divider(color: AColor().green.withAlpha(102)),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             _buildAddress(label: 'Pickup', address: data['pickup'] ?? ''),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             _buildAddress(label: 'Dropoff', address: data['dropoff'] ?? ''),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildAcceptButton(context, data),
           ],
         ),
@@ -157,9 +128,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           children: [
             Text(
               data['name'] ?? '',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               '${data['date'] ?? ''}  -  ${data['time'] ?? ''}',
               style: TextStyle(color: AColor().grey700),
@@ -168,11 +139,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         ),
         Row(
           children: [
-            Text("₹", style: TextStyle(fontSize: 20)),
-            SizedBox(width: 5),
+            const Text("₹", style: TextStyle(fontSize: 20)),
+            const SizedBox(width: 5),
             Text(
               data['amount'] ?? '',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -185,10 +156,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(color: AColor().grey700, fontSize: 14)),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           address,
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -217,18 +188,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             }
 
             final rideId = rideData['rideId'];
-            final updatedRideData = {
-              ...rideData,
-              'driverId': currentUser.uid,
-            };
 
             await FirebaseFirestore.instance
                 .collection('bookings')
                 .doc(rideId)
-                .update({
-              'status': 'accepted',
-              'driverId': currentUser.uid,
-            });
+                .update({'status': 'accepted', 'driverId': currentUser.uid});
 
             _showCustomToast(context, "Ride accepted");
 
@@ -244,9 +208,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                 'rideType': rideData['rideType'] ?? '',
                 'rideId': rideId,
                 'userEmail': rideData['user_email'] ?? '',
+                'amount': rideData['fare']?.toString() ?? '',
               },
             );
-
           } catch (e) {
             print("Error accepting ride: $e");
             _showCustomToast(context, "Failed to accept ride");
@@ -287,8 +251,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
 
     overlay.insert(overlayEntry);
-    Future.delayed(
-      const Duration(seconds: 2),
-    ).then((_) => overlayEntry.remove());
+    Future.delayed(const Duration(seconds: 2)).then((_) => overlayEntry.remove());
   }
 }

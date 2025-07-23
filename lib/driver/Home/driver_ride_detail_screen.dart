@@ -211,7 +211,7 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _DetailText(label: "Pickup Address:", value: rideData['pickup'] ?? 'N/A'),
+            _DetailText(label: "Pickup Address:", value: rideData['pickupAddress'] ?? 'N/A'),
             SizedBox(height: 15),
             _DetailText(label: "Date:", value: rideData['date'] ?? 'N/A'),
             SizedBox(height: 15),
