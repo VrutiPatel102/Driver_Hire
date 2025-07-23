@@ -19,6 +19,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     super.initState();
     fetchRideRequests();
   }
+
   Future<void> fetchRideRequests() async {
     try {
       final bookingsSnapshot = await FirebaseFirestore.instance
@@ -133,8 +134,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             SizedBox(height: 10),
             _buildAddress(label: 'Dropoff', address: data['dropoff'] ?? ''),
             SizedBox(height: 20),
-            _buildAcceptButton(context,data)
-
+            _buildAcceptButton(context, data),
           ],
         ),
       ),
@@ -155,14 +155,14 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             SizedBox(height: 4),
             Text(
               '${data['date'] ?? ''}  -  ${data['time'] ?? ''}',
-              style: TextStyle(color: Colors.grey[700]),
+              style: TextStyle(color: AColor().grey700),
             ),
           ],
         ),
         Row(
           children: [
-            Text("₹",style: TextStyle(fontSize: 20),),
-            SizedBox(width: 5,),
+            Text("₹", style: TextStyle(fontSize: 20)),
+            SizedBox(width: 5),
             Text(
               data['amount'] ?? '',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -177,7 +177,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[700], fontSize: 14)),
+        Text(label, style: TextStyle(color: AColor().grey700, fontSize: 14)),
         SizedBox(height: 4),
         Text(
           address,
@@ -187,7 +187,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-  Widget _buildAcceptButton(BuildContext context, Map<String, dynamic> rideData) {
+  Widget _buildAcceptButton(
+    BuildContext context,
+    Map<String, dynamic> rideData,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -202,22 +205,18 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           try {
             final currentUser = FirebaseAuth.instance.currentUser;
             if (currentUser == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Driver not logged in")),
-              );
+              _showCustomToast(context, "Driver not logged in");
               return;
             }
 
-            final rideId = rideData['rideId']; // must be passed while navigating
-            await FirebaseFirestore.instance.collection('bookings').doc(rideId).update({
-              'status': 'accepted',
-              'driverId': currentUser.uid,
-            });
+            final rideId = rideData['rideId'];
+            await FirebaseFirestore.instance
+                .collection('bookings')
+                .doc(rideId)
+                .update({'status': 'accepted', 'driverId': currentUser.uid});
 
-            // Show confirmation
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Ride accepted")),
-            );
+            _showCustomToast(context, "Ride accepted");
+
             Navigator.pushNamed(
               context,
               AppRoute.driverRideDetailScreen,
@@ -225,14 +224,46 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             );
           } catch (e) {
             print("Error accepting ride: $e");
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Failed to accept ride")),
-            );
+            _showCustomToast(context, "Failed to accept ride");
           }
         },
-        child: Text('Accept', style: TextStyle(color: Colors.white)),
+        child: Text('Accept', style: TextStyle(color: AColor().White)),
       ),
     );
   }
 
+  void _showCustomToast(BuildContext context, String message) {
+    final overlay = Overlay.of(context);
+    final textWidth = (message.length * 8.0).clamp(
+      100.0,
+      MediaQuery.of(context).size.width * 0.8,
+    );
+
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 150,
+        left: (MediaQuery.of(context).size.width - textWidth) / 2,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AColor().grey300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: AColor().Black),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+    Future.delayed(
+      const Duration(seconds: 2),
+    ).then((_) => overlayEntry.remove());
+  }
 }

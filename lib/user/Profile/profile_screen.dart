@@ -1,12 +1,42 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:driver_hire/choose_driverORuser.dart';
 import 'package:driver_hire/color.dart';
-import 'package:driver_hire/login_screen.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:driver_hire/register_screen.dart';
-import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String userName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+  }
+
+  Future<void> fetchUserName() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.email)
+          .get();
+
+      if (userDoc.exists && userDoc.data()!.containsKey('name')) {
+        setState(() {
+          userName = userDoc['name'];
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +49,19 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildBody(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: 20),
-        Text(
+        const SizedBox(height: 20),
+        const Text(
           "Profile Setting",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         _buildProfileAvatar(),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
-          "Albert Stevano Bajefski",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          userName.isNotEmpty ? userName : "Loading...",
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
-        SizedBox(height: 30),
+        const SizedBox(height: 30),
         _buildSectionTitle("Profile"),
         _buildMenuItem(Icons.person, "Personal Data", () {
           Navigator.pushNamed(context, AppRoute.personalData);
@@ -39,7 +69,7 @@ class ProfileScreen extends StatelessWidget {
         _buildMenuItem(Icons.settings, "Settings", () {
           Navigator.pushNamed(context, AppRoute.setting);
         }),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         _buildSectionTitle("Support"),
         _buildMenuItem(Icons.delete_outline, "Request Account Deletion", () {
           showDialog(
@@ -47,10 +77,9 @@ class ProfileScreen extends StatelessWidget {
             builder: (context) => _buildDeleteAccountDialog(context),
           );
         }),
-
-        Spacer(),
+        const Spacer(),
         _buildSignOutButton(context),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -58,7 +87,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildProfileAvatar() {
     return CircleAvatar(
       radius: 45,
-      backgroundColor: Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFF5F5F5),
       child: Icon(Icons.person, size: 40, color: AColor().Grey),
     );
   }
@@ -179,12 +208,11 @@ class ProfileScreen extends StatelessWidget {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ChooseDriverUser(),
+                          builder: (context) => const ChooseDriverUser(),
                         ),
-                        (Route<dynamic> route) => false,
+                            (Route<dynamic> route) => false,
                       );
                     },
-
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AColor().green,
                       shape: RoundedRectangleBorder(
@@ -258,10 +286,9 @@ class ProfileScreen extends StatelessWidget {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const RegisterScreen(), // adjust role
+                          builder: (context) => const RegisterScreen(),
                         ),
-                        (Route<dynamic> route) => false,
+                            (Route<dynamic> route) => false,
                       );
                     },
                     style: ElevatedButton.styleFrom(
