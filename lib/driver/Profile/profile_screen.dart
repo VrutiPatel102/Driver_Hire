@@ -259,7 +259,7 @@ class DriverProfileScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                          const RegisterScreen(), // adjust role
+                          const RegisterScreen(),
                         ),
                             (Route<dynamic> route) => false,
                       );

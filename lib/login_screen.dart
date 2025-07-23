@@ -227,8 +227,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                   return;
                 }
-
-                // ✅ Update login time
                 await FirebaseFirestore.instance
                     .collection(correctCollection)
                     .doc(user.uid)
