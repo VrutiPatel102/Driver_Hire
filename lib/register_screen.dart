@@ -22,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  String? _selectedRole = 'user'; // default role
+  String? _selectedRole = 'user';
 
   @override
   Widget build(BuildContext context) {
