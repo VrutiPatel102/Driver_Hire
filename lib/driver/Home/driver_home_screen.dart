@@ -1,36 +1,78 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
-class DriverHomeScreen extends StatelessWidget {
+class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({super.key});
 
-  final List<Map<String, String>> rideRequests = const [
-    {
-      'name': 'Prakruti Shah',
-      'date': '01/01/2025',
-      'time': '6.54 pm',
-      'pickup': '1 Sky Heven Avenue, Satellite',
-      'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '₹600',
-    },
-    {
-      'name': 'Prakruti Shah',
-      'date': '01/01/2025',
-      'time': '6.54 pm',
-      'pickup': '1 Sky Heven Avenue, Satellite',
-      'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '₹600',
-    },
-    {
-      'name': 'Prakruti Shah',
-      'date': '01/01/2025',
-      'time': '6.54 pm',
-      'pickup': '1 Sky Heven Avenue, Satellite',
-      'dropoff': '1 Bola Dada Avenue, Satellite',
-      'amount': '₹600',
-    },
-  ];
+  @override
+  State<DriverHomeScreen> createState() => _DriverHomeScreenState();
+}
+
+class _DriverHomeScreenState extends State<DriverHomeScreen> {
+  List<Map<String, dynamic>> rideRequests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRideRequests();
+  }
+
+  Future<void> fetchRideRequests() async {
+    final bookingSnapshot = await FirebaseFirestore.instance
+        .collection('bookings')
+        .get();
+
+    List<Map<String, dynamic>> mergedData = [];
+
+    for (var doc in bookingSnapshot.docs) {
+      final bookingData = doc.data();
+      final bookingUid = bookingData['uid'];
+
+      if (bookingUid == null || bookingUid.isEmpty) {
+        continue; // skip if no UID in booking
+      }
+
+      // Find user who matches the UID in 'users' collection
+      final userQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .where('uid', isEqualTo: bookingUid)
+          .limit(1)
+          .get();
+
+      if (userQuery.docs.isEmpty) {
+        print("No user found for UID: $bookingUid");
+        continue;
+      }
+
+      final userData = userQuery.docs.first.data();
+      final userName = userData['name'] ?? 'User';
+
+      print("Booking UID: $bookingUid, User: $userName");
+
+      // Combine booking + user data
+      mergedData.add({
+        'name': userName,
+        'pickup': bookingData['pickup'] ?? '',
+        'dropoff': bookingData['drop'] ?? '',
+        'date': bookingData['date'] ?? '',
+        'time': bookingData['time'] ?? '',
+        'amount': bookingData['amount']?.toString() ?? '',
+      });
+    }
+
+    setState(() {
+      rideRequests = mergedData;
+    });
+
+    print("Total ride requests: ${rideRequests.length}");
+  }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +106,12 @@ class DriverHomeScreen extends StatelessWidget {
       separatorBuilder: (_, __) => SizedBox(height: 16),
       itemBuilder: (context, index) {
         final data = rideRequests[index];
-        return _buildRequestCard(data,context);
+        return _buildRequestCard(data, context);
       },
     );
   }
 
-  Widget _buildRequestCard(Map<String, String> data, BuildContext context) {
+  Widget _buildRequestCard(Map<String, dynamic> data, BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
@@ -91,9 +133,9 @@ class DriverHomeScreen extends StatelessWidget {
             SizedBox(height: 12),
             Divider(color: AColor().green.withAlpha(102)),
             SizedBox(height: 12),
-            _buildAddress(label: 'Pickup', address: data['pickup']!),
+            _buildAddress(label: 'Pickup', address: data['pickup'] ?? ''),
             SizedBox(height: 10),
-            _buildAddress(label: 'Dropoff', address: data['dropoff']!),
+            _buildAddress(label: 'Dropoff', address: data['dropoff'] ?? ''),
             SizedBox(height: 20),
             _buildAcceptButton(context),
           ],
@@ -102,8 +144,7 @@ class DriverHomeScreen extends StatelessWidget {
     );
   }
 
-
-  Widget _buildHeader(Map<String, String> data) {
+  Widget _buildHeader(Map<String, dynamic> data) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -119,7 +160,7 @@ class DriverHomeScreen extends StatelessWidget {
             ),
             SizedBox(height: 4),
             Text(
-              '${data['date']}  -  ${data['time']}',
+              '${data['date'] ?? ''}  -  ${data['time'] ?? ''}',
               style: TextStyle(color: Colors.grey[700]),
             ),
           ],

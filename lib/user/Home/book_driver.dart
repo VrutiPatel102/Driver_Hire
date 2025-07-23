@@ -1,5 +1,6 @@
 import 'package:driver_hire/Address_Pickup_drop/location_picker.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
@@ -141,6 +142,9 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
             String formattedDate = DateFormat(
               'dd-MM-yyyy – hh:mm a',
             ).format(DateTime.now());
+
+            final currentUser = FirebaseAuth.instance.currentUser;
+
             await firestore.FirebaseFirestore.instance
                 .collection('bookings')
                 .add({
@@ -152,6 +156,8 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
                   'rideType': selectedTripType,
                   'saved_at': formattedDate,
                   'fare': 200,
+                  'uid': currentUser?.uid,
+                  'email': currentUser?.email,
                 });
 
             Navigator.pushNamed(
