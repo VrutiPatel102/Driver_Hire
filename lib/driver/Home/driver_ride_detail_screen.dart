@@ -115,6 +115,7 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
           _map(),
           _detailBox(),
           Spacer(),
+
           _cancelBtn(),
         ],
       ),
@@ -217,6 +218,25 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
     );
   }
 
+  Widget _completeBtn() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AColor().Black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onPressed: _cancelRide,
+          child: Text('Cancel Ride', style: TextStyle(color: AColor().White)),
+        ),
+      ),
+    );
+  }
   Widget _cancelBtn() {
     return Padding(
       padding: const EdgeInsets.all(16),
