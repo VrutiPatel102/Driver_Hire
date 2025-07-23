@@ -148,7 +148,7 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
           children: [
             _map(),
             _detailBox(),
-             SizedBox(height: 14),
+            SizedBox(height: 14),
             _completeBtn(),
             _cancelBtn(),
           ],
