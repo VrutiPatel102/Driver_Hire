@@ -40,77 +40,79 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
   Widget _builBody() {
     return Padding(
       padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Book a driver',
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 25),
-          Text(
-            'Please Select your Trip type',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 12),
-          Row(
-            children: [
-              _tripTypeButton('One way'),
-              SizedBox(width: 16),
-              _tripTypeButton('Round trip'),
-            ],
-          ),
-          SizedBox(height: 40),
-          Text(
-            'Select Car Type',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _carTypeOption('Sedan', 'assets/image 1.png'),
-              _carTypeOption('EV', 'assets/image 2.png'),
-              _carTypeOption('SUV', 'assets/image 3.png'),
-            ],
-          ),
-          SizedBox(height: 40),
-          Text(
-            "Pickup & Destination",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 20),
-          Row(
-            children: [_pickupAddress(), SizedBox(width: 20), _dropAddress()],
-          ),
-          SizedBox(height: 20),
-          Text(
-            "Date & Time",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _iconInputField(
-                  Icons.calendar_today,
-                  _getDateText(),
-                  _selectDate,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Book a driver',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 25),
+            Text(
+              'Please Select your Trip type',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 12),
+            Row(
+              children: [
+                _tripTypeButton('One way'),
+                SizedBox(width: 16),
+                _tripTypeButton('Round trip'),
+              ],
+            ),
+            SizedBox(height: 40),
+            Text(
+              'Select Car Type',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _carTypeOption('Sedan', 'assets/image 1.png'),
+                _carTypeOption('EV', 'assets/image 2.png'),
+                _carTypeOption('SUV', 'assets/image 3.png'),
+              ],
+            ),
+            SizedBox(height: 40),
+            Text(
+              "Pickup & Destination",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Row(
+              children: [_pickupAddress(), SizedBox(width: 20), _dropAddress()],
+            ),
+            SizedBox(height: 20),
+            Text(
+              "Date & Time",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _iconInputField(
+                    Icons.calendar_today,
+                    _getDateText(),
+                    _selectDate,
+                  ),
                 ),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: _iconInputField(
-                  Icons.access_time,
-                  _getTimeText(),
-                  _selectTime,
+                SizedBox(width: 12),
+                Expanded(
+                  child: _iconInputField(
+                    Icons.access_time,
+                    _getTimeText(),
+                    _selectTime,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          _nextBtn(),
-        ],
+              ],
+            ),
+            SizedBox(height: 20),
+            _nextBtn(),
+          ],
+        ),
       ),
     );
   }

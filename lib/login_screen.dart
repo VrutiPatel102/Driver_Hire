@@ -23,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: AColor().White,
       appBar: _buildAppbar(),
       body: _buildBody(),
@@ -30,31 +31,35 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildBody() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 40),
-            _logo(),
-            SizedBox(height: 40),
-            _welcomeText(),
-            SizedBox(height: 20),
-            _emailField(),
-            SizedBox(height: 16),
-            _passwordField(),
-            SizedBox(height: 10),
-            _forgotPwd(),
-            _loginButton(),
-            Spacer(),
-            _regField(),
-          ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              _logo(),
+              const SizedBox(height: 40),
+              _welcomeText(),
+              const SizedBox(height: 20),
+              _emailField(),
+              const SizedBox(height: 16),
+              _passwordField(),
+              const SizedBox(height: 10),
+              _forgotPwd(),
+              _loginButton(),
+              const SizedBox(height: 24), // Replaces Spacer
+              _regField(),
+              const SizedBox(height: 16), // Extra bottom padding
+            ],
+          ),
         ),
       ),
     );
   }
+
 
   Widget _logo() {
     return CircleAvatar(

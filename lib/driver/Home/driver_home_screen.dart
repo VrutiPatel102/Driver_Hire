@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,63 +15,61 @@ class DriverHomeScreen extends StatefulWidget {
 
 class _DriverHomeScreenState extends State<DriverHomeScreen> {
   List<Map<String, dynamic>> rideRequests = [];
+  StreamSubscription<QuerySnapshot>? _bookingSubscription;
 
   @override
   void initState() {
     super.initState();
-    fetchRideRequests();
+    listenToRideRequests();
   }
 
-  Future<void> fetchRideRequests() async {
-    try {
-      final bookingsSnapshot = await FirebaseFirestore.instance
-          .collection('bookings')
-          .get();
+  void listenToRideRequests() {
+    _bookingSubscription = FirebaseFirestore.instance
+        .collection('bookings')
+        .snapshots()
+        .listen((snapshot) async {
+      List<Map<String, dynamic>> updatedRequests = [];
 
-      List<Map<String, dynamic>> fetchedRequests = [];
+      for (var doc in snapshot.docs) {
+        final bookingData = doc.data();
+        bookingData['rideId'] = doc.id;
 
-      for (var bookingDoc in bookingsSnapshot.docs) {
-        final bookingData = bookingDoc.data();
-        bookingData['rideId'] = bookingDoc.id;
         final userEmail = bookingData['user_email'];
+        String userName = 'Unknown';
 
         if (userEmail != null && userEmail.toString().isNotEmpty) {
           final userDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(userEmail)
               .get();
-
           if (userDoc.exists) {
-            final userData = userDoc.data()!;
-            final mergedData = {
-              ...bookingData,
-              'name': userData['name'] ?? 'Unknown',
-              'pickup': bookingData['pickupAddress'],
-              'dropoff': bookingData['dropAddress'],
-              'amount': bookingData['fare'].toString(),
-            };
-            fetchedRequests.add(mergedData);
-          } else {
-            fetchedRequests.add({
-              ...bookingData,
-              'name': 'Unknown',
-              'pickup': bookingData['pickupAddress'],
-              'dropoff': bookingData['dropAddress'],
-              'amount': bookingData['fare'].toString(),
-            });
+            userName = userDoc['name'] ?? 'Unknown';
           }
         }
+
+        updatedRequests.add({
+          ...bookingData,
+          'name': userName,
+          'pickup': bookingData['pickupAddress'],
+          'dropoff': bookingData['dropAddress'],
+          'amount': bookingData['fare'].toString(),
+        });
       }
 
       if (mounted) {
         setState(() {
-          rideRequests = fetchedRequests;
+          rideRequests = updatedRequests;
         });
       }
-    } catch (e) {
-      print("Error fetching ride requests: $e");
-    }
+    });
   }
+
+  @override
+  void dispose() {
+    _bookingSubscription?.cancel();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
