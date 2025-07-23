@@ -1,12 +1,42 @@
 import 'package:driver_hire/choose_driverORuser.dart';
 import 'package:driver_hire/color.dart';
-import 'package:driver_hire/login_screen.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:driver_hire/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class DriverProfileScreen extends StatelessWidget {
+class DriverProfileScreen extends StatefulWidget {
   const DriverProfileScreen({super.key});
+
+  @override
+  State<DriverProfileScreen> createState() => _DriverProfileScreenState();
+}
+
+class _DriverProfileScreenState extends State<DriverProfileScreen> {
+  String? driverName;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDriverName();
+  }
+
+  Future<void> fetchDriverName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('drivers')
+          .doc(user.email)
+          .get();
+      if (doc.exists) {
+        setState(() {
+          driverName =
+              doc['name']; // Update this field if your Firestore field name is different
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +58,7 @@ class DriverProfileScreen extends StatelessWidget {
         _buildProfileAvatar(),
         SizedBox(height: 10),
         Text(
-          "Albert Stevano Bajefski",
+          driverName ?? "Loading...",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 30),
@@ -47,7 +77,6 @@ class DriverProfileScreen extends StatelessWidget {
             builder: (context) => _buildDeleteAccountDialog(context),
           );
         }),
-
         Spacer(),
         _buildSignOutButton(context),
         SizedBox(height: 20),
@@ -59,7 +88,7 @@ class DriverProfileScreen extends StatelessWidget {
     return CircleAvatar(
       radius: 45,
       backgroundColor: Color(0xFFF5F5F5),
-      child: Icon(Icons.person, size: 40, color:AColor().Grey),
+      child: Icon(Icons.person, size: 40, color: AColor().Grey),
     );
   }
 
@@ -115,10 +144,10 @@ class DriverProfileScreen extends StatelessWidget {
           ),
           width: double.infinity,
           height: 55,
-          child:  Center(
+          child: Center(
             child: Text(
               "Sign Out",
-              style: TextStyle(fontSize: 20, color:AColor().White),
+              style: TextStyle(fontSize: 20, color: AColor().White),
             ),
           ),
         ),
@@ -181,10 +210,9 @@ class DriverProfileScreen extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => ChooseDriverUser(),
                         ),
-                            (Route<dynamic> route) => false,
+                        (Route<dynamic> route) => false,
                       );
                     },
-
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AColor().green,
                       shape: RoundedRectangleBorder(
@@ -258,10 +286,9 @@ class DriverProfileScreen extends StatelessWidget {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                          const RegisterScreen(),
+                          builder: (context) => const RegisterScreen(),
                         ),
-                            (Route<dynamic> route) => false,
+                        (Route<dynamic> route) => false,
                       );
                     },
                     style: ElevatedButton.styleFrom(

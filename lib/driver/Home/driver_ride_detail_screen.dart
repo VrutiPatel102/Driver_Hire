@@ -41,18 +41,17 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
       _mapController.move(_mapController.camera.center, _currentZoom);
     });
   }
-
   Future<void> _cancelRide() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Driver not logged in")));
+        _showCustomToast(context, "Driver not logged in");
         return;
       }
 
       final rideId = rideData['rideId'];
       if (rideId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Missing ride ID")));
+        _showCustomToast(context, "Missing ride ID");
         return;
       }
 
@@ -61,7 +60,7 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
         'driverId': currentUser.uid,
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Ride cancelled")));
+      _showCustomToast(context, "Ride cancelled");
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -70,24 +69,53 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
       );
     } catch (e) {
       print("Error cancelling ride: $e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to cancel ride")));
+      _showCustomToast(context, "Failed to cancel ride");
     }
   }
 
+  void _showCustomToast(BuildContext context, String message) {
+    final overlay = Overlay.of(context);
+    final textWidth = (message.length * 8.0).clamp(100.0, MediaQuery.of(context).size.width * 0.8);
+
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 150,
+        left: (MediaQuery.of(context).size.width - textWidth) / 2,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AColor().grey300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: AColor().Black),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+    Future.delayed(const Duration(seconds: 2)).then((_) => overlayEntry.remove());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ride Details'),
-        backgroundColor: Colors.white,
+        backgroundColor: AColor().White,
       ),
       body: Column(
         children: [
           _map(),
           _detailBox(),
           Spacer(),
-          _cancelBtn(), // Changed from cancel to accept
+          _cancelBtn(),
         ],
       ),
     );
@@ -220,7 +248,7 @@ class _DetailText extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: TextStyle(fontSize: 15, color: Colors.black),
+        style: TextStyle(fontSize: 15, color: AColor().Black),
         children: [
           TextSpan(
             text: "$label ",

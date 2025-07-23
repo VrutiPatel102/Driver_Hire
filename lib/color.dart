@@ -11,6 +11,7 @@ class AColor {
   Color grey400 = Colors.grey.shade400;
   Color grey50 = Colors.grey.shade50;
   Color grey100 = Colors.grey.shade100;
+  Color grey200 = Colors.grey.shade200;
 
   Color purple50 = Colors.purple.shade50;
 
