@@ -10,8 +10,10 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  final List<TextEditingController> _otpControllers =
-  List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _otpControllers = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +80,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   Widget _subText() {
     return Text(
       'Enter the verification code we just sent on your\nemail address',
-      style: TextStyle(
-        fontSize: 16,
-        color: AColor().Black,
-        height: 1.4,
-      ),
+      style: TextStyle(fontSize: 16, color: AColor().Black, height: 1.4),
     );
   }
 
@@ -91,7 +89,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(
         _otpControllers.length,
-            (index) => SizedBox(
+        (index) => SizedBox(
           width: 60,
           height: 60,
           child: TextField(
@@ -137,25 +135,57 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoute.resetPwd);
-        },
+        onPressed: _verifyOtp,
         child: Text(
           'Verify',
-          style: TextStyle(
-            color: AColor().White,
-            fontSize: 18,
+          style: TextStyle(color: AColor().White, fontSize: 18),
+        ),
+      ),
+    );
+  }
+
+  void _verifyOtp() {
+    String enteredOtp = _otpControllers.map((c) => c.text).join();
+    if (enteredOtp == '1234') {
+      Navigator.pushNamed(context, AppRoute.resetPwd);
+    } else {
+      _showCustomToast('Invalid OTP, please try again!');
+    }
+  }
+
+  void _showCustomToast(String message) {
+    final overlay = Overlay.of(context);
+    if (overlay == null) return;
+
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 150,
+        left: MediaQuery.of(context).size.width * 0.5 - (message.length * 4.0),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AColor().grey300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(message, style: TextStyle(color: AColor().Black)),
           ),
         ),
       ),
     );
+
+    overlay.insert(overlayEntry);
+    Future.delayed(
+      const Duration(seconds: 2),
+    ).then((_) => overlayEntry.remove());
   }
 
   Widget _loginLink() {
     return Center(
       child: TextButton(
         onPressed: () {
-           Navigator.pushNamed(context, AppRoute.login);
+          Navigator.pushNamed(context, AppRoute.login);
         },
         child: Text.rich(
           TextSpan(

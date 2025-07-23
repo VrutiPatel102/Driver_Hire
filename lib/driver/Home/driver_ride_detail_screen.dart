@@ -41,6 +41,38 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
       _mapController.move(_mapController.camera.center, _currentZoom);
     });
   }
+  Future<void> _completeRide() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        _showCustomToast(context, "Driver not logged in");
+        return;
+      }
+
+      final rideId = rideData['rideId'];
+      if (rideId == null) {
+        _showCustomToast(context, "Missing ride ID");
+        return;
+      }
+
+      await FirebaseFirestore.instance.collection('bookings').doc(rideId).update({
+        'status': 'completed',
+        'driverId': currentUser.uid,
+      });
+
+      _showCustomToast(context, "Ride completed");
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => DriverBottomBarScreen(initialIndex: 0)),
+            (route) => false,
+      );
+    } catch (e) {
+      print("Error completing ride: $e");
+      _showCustomToast(context, "Failed to complete ride");
+    }
+  }
+
   Future<void> _cancelRide() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -116,7 +148,8 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
           children: [
             _map(),
             _detailBox(),
-            const SizedBox(height: 24),
+             SizedBox(height: 14),
+            _completeBtn(),
             _cancelBtn(),
           ],
         ),
@@ -219,13 +252,32 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
       ),
     );
   }
+  Widget _completeBtn() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16,right: 16,top: 16),
+      child: SizedBox(
+        width: double.infinity,
+        height: 54,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AColor().Black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onPressed: _completeRide,
+          child: Text('Complete Ride', style: TextStyle(color: AColor().White)),
+        ),
+      ),
+    );
+  }
 
   Widget _cancelBtn() {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: SizedBox(
         width: double.infinity,
-        height: 48,
+        height: 54,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AColor().Black,
