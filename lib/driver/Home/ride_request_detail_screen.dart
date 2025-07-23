@@ -196,7 +196,11 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
           ),
         ),
         onPressed: () {
-          Navigator.pushNamed(context, AppRoute.driverRideDetailScreen);
+          Navigator.pushNamed(
+            context,
+            AppRoute.driverRideDetailScreen,
+            arguments: data,
+          );
         },
         child: const Text(
           "Go To Pickup",
