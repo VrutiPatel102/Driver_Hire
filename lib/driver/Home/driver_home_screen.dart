@@ -349,7 +349,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   Widget _buildRequestCard(Map<String, dynamic> data, BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // You can keep this if you want the card tap to also show ride details before accepting.
         Navigator.pushNamed(
           context,
           AppRoute.rideRequestDetailScreen,
@@ -454,7 +453,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             }
 
             final rideId = rideData['rideId'];
-            // Prevent race condition: check status is 'pending' before accepting
             await FirebaseFirestore.instance.runTransaction((transaction) async {
               final docRef = FirebaseFirestore.instance.collection('bookings').doc(rideId);
               final docSnapshot = await transaction.get(docRef);
@@ -467,6 +465,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               transaction.update(docRef, {
                 'status': 'accepted',
                 'driverId': currentUser.uid,
+                'driver_email': currentUser.email?.trim(),
               });
             });
 
@@ -476,7 +475,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               context,
               AppRoute.driverRideDetailScreen,
               arguments: {
-                // Use the correct field names, or just ...rideData if you want
                 'pickupAddress': rideData['pickup'] ?? '',
                 'dropAddress': rideData['dropoff'] ?? '',
                 'date': rideData['date'] ?? '',
