@@ -26,6 +26,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   void listenToRideRequests() {
     _bookingSubscription = FirebaseFirestore.instance
         .collection('bookings')
+        .orderBy('saved_at', descending: true)
         .snapshots()
         .listen((snapshot) async {
       final List<Map<String, dynamic>> updatedRequests = [];
@@ -61,7 +62,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         });
       }).toList();
 
-      await Future.wait(futures); // Wait for all user data to load in parallel
+      await Future.wait(futures);
 
       if (mounted) {
         setState(() {
@@ -222,10 +223,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               'driverId': currentUser.uid,
             };
 
-            // 🔄 Update ride status & driver assignment
             await FirebaseFirestore.instance
                 .collection('bookings')
                 .doc(rideId)
+
                 .update({
               'status': 'accepted',
               'driverId': currentUser.uid,
@@ -233,7 +234,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
             _showCustomToast(context, "Ride accepted");
 
-            // ✅ Navigate to DriverRideDetailScreen
             Navigator.pushNamed(
               context,
               AppRoute.driverRideDetailScreen,
@@ -249,7 +249,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               },
             );
 
-            // 🧠 Optionally, notify the user via Firestore trigger or FCM (not required here)
+
           } catch (e) {
             print("Error accepting ride: $e");
             _showCustomToast(context, "Failed to accept ride");
