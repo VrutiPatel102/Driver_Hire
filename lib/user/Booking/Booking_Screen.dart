@@ -1,57 +1,64 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
 class BookingsScreen extends StatelessWidget {
   const BookingsScreen({super.key});
 
-  Future<List<Map<String, dynamic>>> _fetchBookingsWithUserNames() async {
-    final bookingsSnapshot = await FirebaseFirestore.instance
+  Stream<List<Map<String, dynamic>>> _bookingsStream() async* {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final currentEmail = currentUser.email?.trim();
+    if (currentEmail == null) return;
+
+    yield* FirebaseFirestore.instance
         .collection('bookings')
-        .orderBy('date', descending: true)
-        .get();
+        .where('user_email', isEqualTo: currentEmail)
+        .snapshots()
+        .asyncMap((snapshot) async {
+      List<Map<String, dynamic>> bookingsWithNames = [];
 
-    List<Map<String, dynamic>> bookingsWithNames = [];
+      for (var doc in snapshot.docs) {
+        final bookingData = doc.data();
+        final driverEmail = bookingData['driver_email'];
 
-    for (var doc in bookingsSnapshot.docs) {
-      final bookingData = doc.data();
-      final driverEmail = bookingData['user_email'];
+        String driverName = 'Unknown';
 
-      String driverName = 'Unknown';
+        if (driverEmail != null && driverEmail is String) {
+          try {
+            final driverDoc = await FirebaseFirestore.instance
+                .collection('drivers')
+                .doc(driverEmail.trim())
+                .get();
 
-      if (driverEmail != null && driverEmail is String) {
-        final trimmedEmail = driverEmail.trim();
-
-        try {
-          final driverDoc = await FirebaseFirestore.instance
-              .collection('drivers')
-              .doc(trimmedEmail)
-              .get();
-
-          if (driverDoc.exists && driverDoc.data()!.containsKey('name')) {
-            driverName = driverDoc.data()!['name'];
-          } else {
-            print("Driver not found for email: $trimmedEmail");
+            if (driverDoc.exists && driverDoc.data()!.containsKey('name')) {
+              driverName = driverDoc.data()!['name'];
+            }
+          } catch (e) {
+            print('Error fetching driver $driverEmail: $e');
           }
-        } catch (e) {
-          print('Error fetching driver $trimmedEmail: $e');
         }
+
+        bookingsWithNames.add({
+          'driverName': driverName,
+          'date': bookingData['date'] ?? '',
+          'time': bookingData['time'] ?? '',
+          'carType': bookingData['carType'] ?? '',
+          'rideType': bookingData['rideType'] ?? '',
+          'status': bookingData['status'] ?? '',
+          'amount': bookingData.containsKey('fare') && bookingData['fare'] != null
+              ? bookingData['fare'].toString()
+              : '0',
+        });
       }
 
-      bookingsWithNames.add({
-        'driverName': driverName,
-        'date': bookingData['date'] ?? '',
-        'time': bookingData['time'] ?? '',
-        'carType': bookingData['carType'] ?? '',
-        'rideType': bookingData['rideType'] ?? '',
-        'status': bookingData['status'] ?? '',
-        'amount': bookingData.containsKey('fare') && bookingData['fare'] != null
-            ? bookingData['fare'].toString()
-            : '0',
-      });
-    }
+      // Optional: local sorting if date is string (e.g. '2025-07-23')
+      bookingsWithNames.sort((a, b) => b['date'].compareTo(a['date']));
 
-    return bookingsWithNames;
+      return bookingsWithNames;
+    });
   }
 
   @override
@@ -79,8 +86,8 @@ class BookingsScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: _fetchBookingsWithUserNames(),
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+          stream: _bookingsStream(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());

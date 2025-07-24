@@ -164,7 +164,7 @@ class _BookDriverScreenState extends State<BookDriverScreen> {
               'rideType': selectedTripType,
               'saved_at': timestamp,
               'fare': estimatedFare,
-              'status': 'Pending',
+              'status': 'pending',
               'user_email': userEmail,
             };
 
