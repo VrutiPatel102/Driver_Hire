@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
 import 'package:flutter/material.dart';
@@ -12,19 +13,38 @@ class WaitingDriver extends StatefulWidget {
 
 class _WaitingDriverState extends State<WaitingDriver> {
   late Map<String, dynamic> bookingDetails;
+  StreamSubscription<DocumentSnapshot>? _bookingListener;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     bookingDetails = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    String bookingId = bookingDetails['bookingId'];
 
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(
-        context,
-        AppRoute.userRideDetailScreen,
-        arguments: bookingDetails,
-      );
+    // Listen for status change in booking document
+    _bookingListener = FirebaseFirestore.instance
+        .collection('bookings')
+        .doc(bookingId)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists) {
+        var data = snapshot.data() as Map<String, dynamic>;
+        if (data['status'] == 'accepted') {
+          _bookingListener?.cancel();
+          Navigator.pushReplacementNamed(
+            context,
+            AppRoute.userRideDetailScreen,
+            arguments: bookingDetails,
+          );
+        }
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _bookingListener?.cancel();
+    super.dispose();
   }
 
   @override
