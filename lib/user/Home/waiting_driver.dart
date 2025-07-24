@@ -18,10 +18,16 @@ class _WaitingDriverState extends State<WaitingDriver> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    bookingDetails = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    String bookingId = bookingDetails['bookingId'];
+    final args = ModalRoute.of(context)?.settings.arguments;
 
-    // Listen for status change in booking document
+    if (args == null || args is! Map<String, dynamic> || args['rideId'] == null) {
+      debugPrint("Invalid or missing booking arguments.");
+      return;
+    }
+
+    bookingDetails = args;
+    String bookingId = bookingDetails['rideId'];
+
     _bookingListener = FirebaseFirestore.instance
         .collection('bookings')
         .doc(bookingId)

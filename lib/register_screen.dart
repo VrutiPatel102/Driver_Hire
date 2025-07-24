@@ -57,32 +57,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildBody() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 10),
-            _logo(),
-            SizedBox(height: 20),
-            _welcomeText(),
-            SizedBox(height: 15),
-            _roleSelector(),
-            SizedBox(height: 15),
-            _usernameField(),
-            SizedBox(height: 14),
-            _emailField(),
-            SizedBox(height: 14),
-            _passwordField(),
-            SizedBox(height: 14),
-            _confirmPasswordField(),
-            SizedBox(height: 20),
-            _registerBtn(),
-            Spacer(),
-            _loginLink(),
-          ],
+    return SafeArea(
+      child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _logo(),
+                const SizedBox(height: 20),
+                _welcomeText(),
+                const SizedBox(height: 15),
+                _roleSelector(),
+                const SizedBox(height: 15),
+                _usernameField(),
+                const SizedBox(height: 14),
+                _emailField(),
+                const SizedBox(height: 14),
+                _passwordField(),
+                const SizedBox(height: 14),
+                _confirmPasswordField(),
+                const SizedBox(height: 20),
+                _registerBtn(),
+                const SizedBox(height: 30),
+                _loginLink(),
+              ],
+            ),
+          ),
         ),
       ),
     );
