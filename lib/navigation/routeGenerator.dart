@@ -98,7 +98,15 @@ class RouteGenerator{
         );
 
       case AppRoute.userRideDetailScreen:
-        final args = settings.arguments as Map<String, dynamic>;
+        final args = settings.arguments;
+        if (args == null || args is! Map<String, dynamic>) {
+          return MaterialPageRoute(
+            builder: (context) => const Scaffold(
+              body: Center(child: Text("Missing or invalid arguments.")),
+            ),
+          );
+        }
+
         return MaterialPageRoute(
           builder: (context) => UserRideDetailScreen(
             pickupAddress: args['pickupAddress'] ?? '',
