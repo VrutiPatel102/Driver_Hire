@@ -421,7 +421,6 @@ class _DriverRideDetailScreenState extends State<DriverRideDetailScreen> {
         MaterialPageRoute(
           builder: (_) => DriverBottomBarScreen(initialIndex: 1),
         ),
-        // <-- Navigate to Bookings tab
         (route) => false,
       );
     } catch (e) {
