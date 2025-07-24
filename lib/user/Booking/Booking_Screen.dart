@@ -24,9 +24,9 @@ class BookingsScreen extends StatelessWidget {
         final bookingData = doc.data();
         final driverEmail = bookingData['driver_email'];
 
-        String driverName = 'Unknown';
+        String driverName = 'Pending Assignment';
 
-        if (driverEmail != null && driverEmail is String) {
+        if (driverEmail != null && driverEmail is String && driverEmail.trim().isNotEmpty) {
           try {
             final driverDoc = await FirebaseFirestore.instance
                 .collection('drivers')
@@ -40,6 +40,7 @@ class BookingsScreen extends StatelessWidget {
             print('Error fetching driver $driverEmail: $e');
           }
         }
+
 
         bookingsWithNames.add({
           'driverName': driverName,
@@ -150,7 +151,7 @@ class BookingsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Driver Name: $driverName'),
+          Text('Driver: $driverName'),
           const SizedBox(height: 8),
           Text('Date: $date'),
           const SizedBox(height: 8),
