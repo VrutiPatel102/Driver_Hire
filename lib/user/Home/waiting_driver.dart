@@ -71,6 +71,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/color.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class WaitingDriver extends StatefulWidget {
@@ -168,11 +169,12 @@ class _WaitingDriverState extends State<WaitingDriver> {
                 });
               }
 
-              // Navigate only once when driver accepts
               if (driverId != null &&
                   driverId.toString().isNotEmpty &&
                   !_hasNavigated) {
                 _hasNavigated = true;
+                final userEmail = FirebaseAuth.instance.currentUser?.email ?? '';
+
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   Navigator.pushReplacementNamed(
                     context,
@@ -184,10 +186,12 @@ class _WaitingDriverState extends State<WaitingDriver> {
                       'time': time,
                       'carType': carType,
                       'rideType': tripType,
+                      'userEmail': userEmail,
                     },
                   );
                 });
               }
+
 
               return const SizedBox();
             },
