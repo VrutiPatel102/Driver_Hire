@@ -41,8 +41,8 @@ class BookingsScreen extends StatelessWidget {
           }
         }
 
-
         bookingsWithNames.add({
+          'id': doc.id, // Added document ID
           'driverName': driverName,
           'date': bookingData['date'] ?? '',
           'time': bookingData['time'] ?? '',
@@ -55,7 +55,6 @@ class BookingsScreen extends StatelessWidget {
         });
       }
 
-      // Optional: local sorting if date is string (e.g. '2025-07-23')
       bookingsWithNames.sort((a, b) => b['date'].compareTo(a['date']));
 
       return bookingsWithNames;
@@ -110,6 +109,8 @@ class BookingsScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final booking = bookings[index];
                 return _buildBookingCard(
+                  context: context,
+                  id: booking['id'],
                   driverName: booking['driverName'],
                   date: booking['date'],
                   time: booking['time'],
@@ -127,6 +128,8 @@ class BookingsScreen extends StatelessWidget {
   }
 
   Widget _buildBookingCard({
+    required BuildContext context,
+    required String id,
     required String driverName,
     required String date,
     required String time,
@@ -151,7 +154,17 @@ class BookingsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Driver: $driverName'),
+          // Top row with Driver and delete icon
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Driver: $driverName'),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _confirmAndDeleteBooking(context, id),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text('Date: $date'),
           const SizedBox(height: 8),
@@ -174,5 +187,33 @@ class BookingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _confirmAndDeleteBooking(BuildContext context, String id) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Delete Booking"),
+        content: const Text("Are you sure you want to delete this booking?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancel")),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Delete")),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      try {
+        await FirebaseFirestore.instance.collection('bookings').doc(id).delete();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Booking deleted successfully")),
+        );
+      } catch (e) {
+        print("Error deleting booking: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to delete booking")),
+        );
+      }
+    }
   }
 }

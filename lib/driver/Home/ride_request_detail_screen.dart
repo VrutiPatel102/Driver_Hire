@@ -57,7 +57,7 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
       backgroundColor: AColor().White,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios, color: AColor().green),
+        icon: Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -183,33 +183,6 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
       ],
     );
   }
-
-  // Widget _buildBottomButton(BuildContext context) {
-  //   return Container(
-  //     padding: const EdgeInsets.all(20),
-  //     child: ElevatedButton(
-  //       style: ElevatedButton.styleFrom(
-  //         backgroundColor: AColor().Black,
-  //         padding: const EdgeInsets.symmetric(vertical: 16),
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(16),
-  //         ),
-  //       ),
-  //       onPressed: () {
-  //         Navigator.pushNamed(
-  //           context,
-  //           AppRoute.driverRideDetailScreen,
-  //           arguments: data,
-  //         );
-  //       },
-  //       child: const Text(
-  //         "Go To Pickup",
-  //         style: TextStyle(color: Colors.white),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildBottomButton(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -222,25 +195,39 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
           ),
         ),
         onPressed: () async {
-          final currentUser = FirebaseAuth.instance.currentUser;
+          final driver = FirebaseAuth.instance.currentUser;
+          if (driver == null) return;
 
-          if (currentUser != null) {
-            await FirebaseFirestore.instance
-                .collection('bookings')
-                .doc(data['bookingId'])
-                .update({
-                  'driverId': currentUser.uid,
-                  'driver_email': currentUser.email,
-                });
+          final rideId = data['rideId'];
+          if (rideId != null) {
+            try {
+              await FirebaseFirestore.instance
+                  .collection('bookings')
+                  .doc(rideId)
+                  .update({
+                    'driver_email': driver.email,
+                    'driverId': driver.uid,
+                    'status': 'Accepted',
+                  });
 
-            Navigator.pushNamed(
-              context,
-              AppRoute.driverRideDetailScreen,
-              arguments: data,
-            );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text("Ride accepted")));
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Failed to accept ride: $e")),
+              );
+              return;
+            }
           }
-        },
 
+          // Navigation (already exists)
+          Navigator.pushNamed(
+            context,
+            AppRoute.driverRideDetailScreen,
+            arguments: data,
+          );
+        },
         child: const Text(
           "Go To Pickup",
           style: TextStyle(color: Colors.white),
