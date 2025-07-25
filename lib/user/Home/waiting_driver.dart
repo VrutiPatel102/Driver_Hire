@@ -187,6 +187,7 @@ class _WaitingDriverState extends State<WaitingDriver> {
                       'carType': carType,
                       'rideType': tripType,
                       'userEmail': userEmail,
+                      'bookingId': bookingId,
                     },
                   );
                 });

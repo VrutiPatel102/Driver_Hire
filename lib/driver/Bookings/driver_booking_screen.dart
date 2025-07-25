@@ -213,8 +213,6 @@ class DriverBookingScreen extends StatelessWidget {
           stream: FirebaseFirestore.instance
               .collection('bookings')
               .where('driverId', isEqualTo: driver.uid)
-          // Optionally filter status, e.g. accepted, completed, cancelled
-          //.where('status', whereIn: ['accepted', 'completed', 'cancelled'])
               .orderBy('date', descending: true)
               .snapshots(),
           builder: (context, snapshot) {

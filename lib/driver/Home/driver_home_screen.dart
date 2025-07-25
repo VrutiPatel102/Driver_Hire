@@ -192,7 +192,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             await FirebaseFirestore.instance
                 .collection('bookings')
                 .doc(rideId)
-                .update({'status': 'accepted', 'driverId': currentUser.uid});
+                .update({
+              'status': 'accepted',
+              'driverId': currentUser.uid,
+              'driver_email': currentUser.email,
+            });
 
             _showCustomToast(context, "Ride accepted");
 

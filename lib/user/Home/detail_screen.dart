@@ -224,7 +224,6 @@
 //     );
 //   }
 // }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/bottom_bar.dart';
 import 'package:driver_hire/color.dart';
@@ -240,6 +239,7 @@ class UserRideDetailScreen extends StatefulWidget {
   final String carType;
   final String rideType;
   final String userEmail;
+  final String bookingId;
 
   const UserRideDetailScreen({
     Key? key,
@@ -250,7 +250,7 @@ class UserRideDetailScreen extends StatefulWidget {
     required this.carType,
     required this.rideType,
     required this.userEmail,
-
+    required this.bookingId,
   }) : super(key: key);
 
   @override
@@ -262,48 +262,7 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
   double _currentZoom = 13.0;
 
   final LatLng startPoint = LatLng(23.0225, 72.5714); // Ahmedabad
-  final LatLng endPoint = LatLng(23.0325, 72.5800); // Nearby
-
-  String? driverName;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchDriverName();
-  }
-
-  Future<void> _fetchDriverName() async {
-    try {
-      final bookingSnap = await FirebaseFirestore.instance
-          .collection('bookings')
-          .where('status', isEqualTo: 'accepted')
-          .where('pickupAddress', isEqualTo: widget.pickupAddress)
-          .where('dropAddress', isEqualTo: widget.dropAddress)
-          .limit(1)
-          .get();
-
-      if (bookingSnap.docs.isNotEmpty) {
-        final booking = bookingSnap.docs.first.data();
-        final driverEmail = booking['driver_email'];
-
-        if (driverEmail != null && driverEmail.toString().isNotEmpty) {
-          final driverSnap = await FirebaseFirestore.instance
-              .collection('drivers')
-              .doc(driverEmail)
-              .get();
-
-          if (driverSnap.exists) {
-            setState(() {
-              driverName = driverSnap.data()?['name'] ?? 'Unknown';
-            });
-          }
-        }
-      }
-    } catch (e) {
-      print('Error fetching driver name: $e');
-    }
-  }
-
+  final LatLng endPoint = LatLng(23.0325, 72.5800);   // Nearby
 
   void _zoomIn() {
     setState(() {
@@ -365,21 +324,13 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
                     point: startPoint,
                     width: 40,
                     height: 40,
-                    child: Icon(
-                      Icons.location_on,
-                      color: AColor().green,
-                      size: 40,
-                    ),
+                    child: Icon(Icons.location_on, color: AColor().green, size: 40),
                   ),
                   Marker(
                     point: endPoint,
                     width: 40,
                     height: 40,
-                    child: Icon(
-                      Icons.location_on,
-                      color: AColor().Red,
-                      size: 40,
-                    ),
+                    child: Icon(Icons.location_on, color: AColor().Red, size: 40),
                   ),
                 ],
               ),
@@ -392,6 +343,48 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
   }
 
   Widget _detailBox() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('bookings')
+          .doc(widget.bookingId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final bookingData = snapshot.data!.data() as Map<String, dynamic>?;
+          final driverEmail = bookingData?['driver_email'] ?? '';
+
+          if (driverEmail.isEmpty) {
+            return _buildDetailContainer('Driver not assigned yet');
+          }
+
+          return StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('drivers')
+                .doc(driverEmail)
+                .snapshots(),
+            builder: (context, driverSnapshot) {
+              if (driverSnapshot.connectionState == ConnectionState.waiting) {
+                return _buildDetailContainer('Loading driver...');
+              }
+
+              if (driverSnapshot.hasData && driverSnapshot.data!.exists) {
+                final driverData =
+                driverSnapshot.data!.data() as Map<String, dynamic>?;
+                final driverName = driverData?['name'] ?? 'Unknown';
+                return _buildDetailContainer(driverName);
+              }
+
+              return _buildDetailContainer('Driver not found');
+            },
+          );
+        }
+
+        return _buildDetailContainer('Driver not assigned yet');
+      },
+    );
+  }
+
+  Widget _buildDetailContainer(String driverName) {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, top: 37),
       child: Container(
@@ -404,7 +397,7 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _DetailText(label: "Driver Name:", value: driverName ?? 'Loading ...'),
+            _DetailText(label: "Driver Name:", value: driverName),
             _DetailText(label: "Pickup Address:", value: widget.pickupAddress),
             _DetailText(label: "Drop Address:", value: widget.dropAddress),
             _DetailText(label: "Date:", value: widget.date),

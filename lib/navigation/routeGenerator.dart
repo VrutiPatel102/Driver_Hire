@@ -116,6 +116,7 @@ class RouteGenerator{
             carType: args['carType'] ?? '',
             rideType: args['rideType'] ?? '',
             userEmail: args['userEmail'] ?? '',
+            bookingId: args['bookingId'] ?? '',
           ),
           settings: settings,
         );
