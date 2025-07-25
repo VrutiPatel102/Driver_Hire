@@ -115,9 +115,11 @@ class RouteGenerator{
             time: args['time'] ?? '',
             carType: args['carType'] ?? '',
             rideType: args['rideType'] ?? '',
+            userEmail: args['userEmail'] ?? '',
           ),
           settings: settings,
         );
+
 
 
       case AppRoute.rideRequestDetailScreen:
