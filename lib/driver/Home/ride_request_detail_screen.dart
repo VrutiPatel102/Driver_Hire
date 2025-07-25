@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
@@ -56,7 +57,7 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
       backgroundColor: AColor().White,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios, color: AColor().green),
+        icon: Icon(Icons.arrow_back),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -152,7 +153,6 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
     );
   }
 
-
   Widget _buildPaymentDetails() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +183,6 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
       ],
     );
   }
-
   Widget _buildBottomButton(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -195,7 +194,34 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-        onPressed: () {
+        onPressed: () async {
+          final driver = FirebaseAuth.instance.currentUser;
+          if (driver == null) return;
+
+          final rideId = data['rideId'];
+          if (rideId != null) {
+            try {
+              await FirebaseFirestore.instance
+                  .collection('bookings')
+                  .doc(rideId)
+                  .update({
+                    'driver_email': driver.email,
+                    'driverId': driver.uid,
+                    'status': 'Accepted',
+                  });
+
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text("Ride accepted")));
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Failed to accept ride: $e")),
+              );
+              return;
+            }
+          }
+
+          // Navigation (already exists)
           Navigator.pushNamed(
             context,
             AppRoute.driverRideDetailScreen,

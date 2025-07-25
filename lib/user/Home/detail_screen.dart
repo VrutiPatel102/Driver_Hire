@@ -449,20 +449,72 @@ class _UserRideDetailScreenState extends State<UserRideDetailScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BottomBarScreen(initialIndex: 0),
-              ),
-                  (route) => false,
-            );
+          onPressed: () async {
+            try {
+              final query = await FirebaseFirestore.instance
+                  .collection('bookings')
+                  .where('pickupAddress', isEqualTo: widget.pickupAddress)
+                  .where('dropAddress', isEqualTo: widget.dropAddress)
+                  .where('date', isEqualTo: widget.date)
+                  .where('time', isEqualTo: widget.time)
+                  .where('user_email', isEqualTo: widget.userEmail)
+                  .limit(1)
+                  .get();
+
+              if (query.docs.isNotEmpty) {
+                await query.docs.first.reference.update({'status': 'cancelled'});
+
+                // ✅ Show custom toast
+                _showCustomToast("Ride cancelled");
+
+                // Delay before navigating back to allow toast visibility
+                await Future.delayed(Duration(milliseconds: 1500));
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BottomBarScreen(initialIndex: 0),
+                  ),
+                      (route) => false,
+                );
+              } else {
+                _showCustomToast("No matching ride found");
+              }
+            } catch (e) {
+              print('Error cancelling booking: $e');
+              _showCustomToast("Failed to cancel ride");
+            }
           },
           child: Text('Cancel Ride', style: TextStyle(color: AColor().White)),
         ),
       ),
     );
   }
+  void _showCustomToast(String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 150,
+        left: MediaQuery.of(context).size.width * 0.5 - (message.length * 4.0),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AColor().grey300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(message, style: TextStyle(color: AColor().Black)),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+    Future.delayed(Duration(seconds: 2)).then((_) => overlayEntry.remove());
+  }
+
+
 }
 
 class _DetailText extends StatelessWidget {
