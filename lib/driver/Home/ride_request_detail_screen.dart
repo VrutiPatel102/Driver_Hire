@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:driver_hire/navigation/appRoute.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:driver_hire/color.dart';
 
@@ -152,7 +153,6 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
     );
   }
 
-
   Widget _buildPaymentDetails() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,6 +184,32 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
     );
   }
 
+  // Widget _buildBottomButton(BuildContext context) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(20),
+  //     child: ElevatedButton(
+  //       style: ElevatedButton.styleFrom(
+  //         backgroundColor: AColor().Black,
+  //         padding: const EdgeInsets.symmetric(vertical: 16),
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(16),
+  //         ),
+  //       ),
+  //       onPressed: () {
+  //         Navigator.pushNamed(
+  //           context,
+  //           AppRoute.driverRideDetailScreen,
+  //           arguments: data,
+  //         );
+  //       },
+  //       child: const Text(
+  //         "Go To Pickup",
+  //         style: TextStyle(color: Colors.white),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildBottomButton(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -195,13 +221,26 @@ class _RideRequestDetailScreenState extends State<RideRequestDetailScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            AppRoute.driverRideDetailScreen,
-            arguments: data,
-          );
+        onPressed: () async {
+          final currentUser = FirebaseAuth.instance.currentUser;
+
+          if (currentUser != null) {
+            await FirebaseFirestore.instance
+                .collection('bookings')
+                .doc(data['bookingId'])
+                .update({
+                  'driverId': currentUser.uid,
+                  'driver_email': currentUser.email,
+                });
+
+            Navigator.pushNamed(
+              context,
+              AppRoute.driverRideDetailScreen,
+              arguments: data,
+            );
+          }
         },
+
         child: const Text(
           "Go To Pickup",
           style: TextStyle(color: Colors.white),
